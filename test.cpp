@@ -1,7 +1,6 @@
-#include "API.h"
+#include "LCU_API.h"
 int main() {
-	API api;
-	api.BuildRoom(TFTNormal);
+	LCUAPI::LCU_API api;
+	api.BuildTFTRankRoom();
 	system("pause");
-	return 0;
 }

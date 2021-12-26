@@ -42,6 +42,9 @@
     <ClCompile Include="API.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="LCU_API.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="json\allocator.h">
@@ -96,6 +99,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="API.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="websocket.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LCU_API.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

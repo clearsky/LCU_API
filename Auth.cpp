@@ -14,7 +14,6 @@ bool Auth::GetRiotClientInfo()
 	size_t nPos = sAuth.find(appPort);
 	if (nPos != std::string::npos)
 		riotPort = std::stoi(sAuth.substr(nPos + appPort.size(), 5)); // port is always 5 numbers long
-
 	std::string remotingAuth = "--remoting-auth-token=";
 	nPos = sAuth.find(remotingAuth) + strlen(remotingAuth.c_str());
 	if (nPos != std::string::npos)
@@ -71,6 +70,7 @@ bool  Auth::GetLeagueClientInfo()
 	if (nPos != std::string::npos)
 	{
 		std::string token = "riot:" + sAuth.substr(nPos, 22);
+		printf("%s\n", token.c_str());
 		unsigned char m_Test[50];
 		strncpy((char*)m_Test, token.c_str(), sizeof(m_Test));
 		leagueToken = base64.Encode(m_Test, token.size()).c_str();
@@ -81,9 +81,8 @@ bool  Auth::GetLeagueClientInfo()
 
 		return 0;
 	}
-
+	
 	MakeLeagueHeader();
-
 	return 1;
 }
 
