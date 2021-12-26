@@ -21,35 +21,43 @@ enum EventType {
 	DEL,
 	ALL
 };
-
+enum EventHandleType
+{
+	FILTER,
+	BIND
+};
 
 namespace LCUAPI {
 class LCU_API
 	{
 	public:
-		LCU_API();
+		LCU_API(EventHandleType event_handle_type);
 		~LCU_API();
 	private:
+		EventHandleType event_handle_type;
 		std::string buildRoomApi;
 		std::string startQueueApi;
 	public:
 		std::unordered_map<std::string, EVENT_CALLBACK[3]> filter;
+		std::unordered_map<std::string, EVENT_CALLBACK> bind;
 		Auth auth;
 		web::websockets::client::websocket_callback_client *ws_client;
 		HTTP http_client;
 		bool connected;
 		std::string host;
 		std::string prot[2];
-		std::function<std::string&(const std::string&, const std::string&)> GET;
-		std::function<std::string&(const std::string&, const std::string&)> POST;
-		std::function<std::string&(const std::string&, const std::string&)> PUT;
-		std::function<std::string&(const std::string&, const std::string&)> DELETe;
+		std::function<std::string(const std::string&, const std::string&)> GET;
+		std::function<std::string(const std::string&, const std::string&)> POST;
+		std::function<std::string(const std::string&, const std::string&)> PUT;
+		std::function<std::string(const std::string&, const std::string&)> DELETe;
 	private:
 		bool Connect();
 	public:
 		void HandleEventMessage(web::websockets::client::websocket_incoming_message& msg);
-		bool AddEventFilter(std::string uri, EventType type, EVENT_CALLBACK call_back);
-		bool RemoveEventFilter(std::string uri, EventType type);
+		bool BindEvent(const std::string & method, EVENT_CALLBACK call_back);
+		bool UnBindEvent(const std::string & method);
+		bool AddEventFilter(const std::string &uri, EventType type, EVENT_CALLBACK call_back);
+		bool RemoveEventFilter(const std::string &uri, EventType type);
 		bool IsAPIServerConnected(); // api是否连接
 		template<typename T>
 		bool ResultCheck(const std::string& data,const std::string& attr, T aim); // 返回值检查
@@ -58,7 +66,7 @@ class LCU_API
 		bool BuildTFTNormalRoom(); // 创建云顶匹配
 		bool BuildTFTRankRoom(); // 创建云顶排位
 		bool StartQueue(); // 开始匹配
-		std::string &Request(const std::string &method, const std::string &url, const std::string &requestData = "", const std::string &header = "",
+		std::string Request(const std::string &method, const std::string &url, const std::string &requestData = "", const std::string &header = "",
 			const std::string& cookies = "", const std::string &returnCookies = "", int port = -1);
 };
 }
