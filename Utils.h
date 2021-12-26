@@ -50,7 +50,8 @@ public:
 	// adds the "Hidden" attribute to a file
 	bool HideFile(std::string path);
 
-	std::string formatJson(std::string json);
+	std::string formatJson(const std::string &json);
+	std::string UtfToGbk(const char* utf8);
 };
 
 extern Utils* utils;

@@ -1,12 +1,13 @@
 #include "LCU_API.h"
 #include "atlbase.h"
 #include "atlstr.h"
+#include "Utils.h"
 #include <string>
 #include "json/json.h"
 
 
+
 using namespace LCUAPI;
-using namespace std;
 using namespace web;
 using namespace web::websockets::client;
 
@@ -25,9 +26,68 @@ LCU_API::LCU_API() {
 	startQueueApi = "/matchmaking/search";
 }
 
-bool LCU_API::AddEventFilter(std::string uri, EventType type) {
+bool LCU_API::AddEventFilter(std::string uri, EventType type, EVENT_CALLBACK call_back) {
+	if (filter.find(uri) != filter.end()) {
+		switch (type)
+		{
+		case CREATE:
+			filter.at(uri)[0] = call_back;
+			break;
+		case UPDATE:
+			filter.at(uri)[1] = call_back;
+			break;
+		case DEL:
+			filter.at(uri)[2] = call_back;
+			break;
+		default:
+			return false;
+		}
+	}
+	else {
+		switch (type)
+		{
+		case CREATE:
+			filter[uri][0] = call_back;
+			break;
+		case UPDATE:
+			filter[uri][1] = call_back;
+			break;
+		case DEL:
+			filter[uri][2] = call_back;
+			break;
+		default:
+			return false;
+		}
+	}
+	return true;
 }
 
+bool LCU_API::RemoveEventFilter(std::string uri, EventType type) {
+	if (filter.find(uri) == filter.end()) {
+		return true;
+	}
+	switch (type)
+	{
+	case CREATE:
+		filter.at(uri)[0] = nullptr;
+		break;
+	case UPDATE:
+		filter.at(uri)[1] = nullptr;
+		break;
+	case DEL:
+		filter.at(uri)[2] = nullptr;
+		break;
+	case ALL:
+		filter.at(uri)[0] = nullptr;
+		filter.at(uri)[1] = nullptr;
+		filter.at(uri)[2] = nullptr;
+		break;
+	default:
+		return false;
+		break;
+	}
+	return true;
+}
 // 连接LCU
 bool LCU_API::Connect() {
 	if (!auth.GetLeagueClientInfo()) {
@@ -38,32 +98,33 @@ bool LCU_API::Connect() {
 	}
 	websocket_client_config ws_config;
 	ws_config.set_validate_certificates(false);
-	string auth_str = "Basic ";
+	std::string auth_str = "Basic ";
 	auth_str += auth.leagueToken;
 	ws_config.headers()[L"Authorization"] = CA2W(auth_str.c_str());
 
 	ws_client = new websocket_callback_client(ws_config);
 
-	string ws_str = prot[1] + host + ":" + to_string(auth.leaguePort);
+	std::string ws_str = prot[1] + host + ":" + std::to_string(auth.leaguePort);
 	wchar_t* ws_wstr = CA2W(ws_str.c_str());
 	try {
 		auto con_ret = ws_client->connect(ws_wstr).then([]() {
-			cout << "wss connected" << endl;
+			std::cout << "wss connected" << std::endl;
 		});
 		con_ret.wait();
 
 		websocket_outgoing_message msg;
 		msg.set_utf8_message("[5, \"OnJsonApiEvent\"]");
-		ws_client->send(msg).then([]() {
-			cout << "subscribed all events" << endl;
+		auto sub_ret = ws_client->send(msg).then([]() {
+			std::cout << "subscribed all events" << std::endl;
 		});
+		sub_ret.wait();
 
 		ws_client->set_message_handler([this](websocket_incoming_message msg){
 			this->HandleEventMessage(msg);
 		});
 		ws_client->set_close_handler([this](websocket_close_status close_status,const utility::string_t& reason,const std::error_code& error) {
 			this->connected = false;
-			cout << "wss connect close" << endl;
+			std::cout << "wss connect closed" << std::endl;
 		});
 	}
 	catch (websocket_exception const& ex) {
@@ -74,7 +135,58 @@ bool LCU_API::Connect() {
 }
 
 void LCU_API::HandleEventMessage(websocket_incoming_message& msg) {
-	cout << msg.extract_string().get() << endl;
+	if (!msg.length()) {
+		return;
+	}
+	bool need_handle = false;
+	std::string msg_str = msg.extract_string().get();
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(msg_str.c_str(), msg_str.c_str() + static_cast<int>(msg_str.length() - 1), &root, &err)) {
+		if (root[0].asInt() == 8) {
+			std::string uri = root[2]["uri"].asString();
+			if (filter.find(uri) != filter.end()) {
+				int type_index = -1;
+				std::string event_type = root[2]["eventType"].asString();
+				if (!event_type.compare("Create")) {
+					type_index = 0;
+				}
+				else if (!event_type.compare("Update")) {
+					type_index = 1;
+				}
+				else if (!event_type.compare("Delete")) {
+					type_index = 2;
+				}
+				if (type_index != -1) {
+					if (filter.at(uri)[type_index]) {
+						need_handle = true;
+						filter.at(uri)[type_index](root);
+					}
+				}
+			}
+		}
+	}
+#ifndef  LOG_ALL_EVENT
+	if (!need_handle) {
+		return;
+	}
+#endif // ! LOG_ALL_EVENT
+
+#ifdef USE_LOG
+#ifdef JSON_FORMAT
+	string log_content = utils->formatJson(msg_str);
+#else
+	std::string log_content = msg_str;
+#endif // JSON_FORMAT
+#ifdef USE_GBK
+	log_content = utils->UtfToGbk(log_content.c_str());
+#endif // USE_GBK
+	std::cout << "==================EVENT INFO================" << std::endl;
+	std::cout << log_content << std::endl;
+#endif // USE_LOG
+	
 }
 
 // 检测是否连接LCU
@@ -95,7 +207,7 @@ bool LCU_API::IsAPIServerConnected() {
 		}
 	}
 	if (!connected) {
-		cout << "lcu not connected" << endl;
+		std::cout << "lcu not connected" << std::endl;
 	}
 	return connected;
 }
@@ -110,8 +222,7 @@ bool LCU_API::StartQueue() {
 	if (!IsAPIServerConnected()) {
 		return false;
 	}
-	result = POST(url(startQueueApi), "");
-	if (result.empty()) {
+	if (POST(url(startQueueApi), "").empty()) {
 		return true;
 	}
 	else {
@@ -124,9 +235,8 @@ bool LCU_API::BuildRoom(QueueID type) {
 	if (!IsAPIServerConnected()) {
 		return false;
 	}
-	std::string body = R"({"queueId":)" + std::to_string(1090) + "}";
-	result = POST(url(buildRoomApi), body);
-	return ResultCheck("canStartActivity", true);
+	std::string body = R"({"queueId":)" + std::to_string(static_cast<int>(type)) + "}";
+	return ResultCheck(POST(url(buildRoomApi), body), "canStartActivity", true);
 }
 
 // 创建云顶匹配房间
@@ -138,7 +248,6 @@ bool LCU_API::BuildTFTNormalRoom() {
 bool LCU_API::BuildTFTRankRoom() {
 	return BuildRoom(TFTRanked);
 }
-
 
 std::string &LCU_API::Request(const std::string& method, const std::string& url, const std::string& requestData, const std::string& header,
 	const std::string& cookies, const std::string& returnCookies, int port) {
@@ -153,7 +262,9 @@ std::string &LCU_API::Request(const std::string& method, const std::string& url,
 #else
 		content = requestData;
 #endif // JSON_FORMAT
-
+#ifdef USE_GBK
+		content = utils->UtfToGbk(content.c_str());
+#endif // USE_GBK
 		std::cout << "Request Data:" << std::endl << content << std::endl;
 	}
 	if (!result.empty()) {
@@ -163,24 +274,26 @@ std::string &LCU_API::Request(const std::string& method, const std::string& url,
 #else
 		content = result;
 #endif // JSON_FORMAT
+#ifdef USE_GBK
+		content = utils->UtfToGbk(content.c_str());
+#endif // USE_GBK
 		std::cout << "Result:" << std::endl << content << std::endl;
 	}
 #endif //  USE_LOG
 	return result;
 }
 
-
 template<typename T>
-bool LCU_API::ResultCheck(const std::string& attr, T aim) {
+bool LCU_API::ResultCheck(const std::string& data, const std::string& attr, T aim) {
 	bool ret = false;
 	// 检测结果
-	if (!result.empty())
+	if (!data.empty())
 	{
 		Json::CharReaderBuilder builder;
 		const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
 		JSONCPP_STRING err;
 		Json::Value root;
-		if (!reader->parse(result.c_str(), result.c_str() + static_cast<int>(result.length() - 1), &root, &err)) {
+		if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
 			try
 			{
 				if (root[attr].as<T>() == aim) {
@@ -192,7 +305,6 @@ bool LCU_API::ResultCheck(const std::string& attr, T aim) {
 				ret = false;
 			}
 		}
-		result = "";
 	}
 	return ret;
 }

@@ -225,7 +225,7 @@ std::string getLevelStr(int level)
 
 }
 
-std::string Utils::formatJson(std::string json)
+std::string Utils::formatJson(const std::string &json)
 {
 	std::string result = "";
 	int level = 0;
@@ -264,6 +264,20 @@ std::string Utils::formatJson(std::string json)
 
 	}
 	return result;
+}
+
+std::string Utils::UtfToGbk(const char* utf8)
+{
+	int len = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, NULL, 0);
+	wchar_t* wstr = new wchar_t[len + 1];
+	memset(wstr, 0, len + 1);
+	MultiByteToWideChar(CP_UTF8, 0, utf8, -1, wstr, len);
+	len = WideCharToMultiByte(CP_ACP, 0, wstr, -1, NULL, 0, NULL, NULL);
+	char* str = new char[len + 1];
+	memset(str, 0, len + 1);
+	WideCharToMultiByte(CP_ACP, 0, wstr, -1, str, len, NULL, NULL);
+	if (wstr) delete[] wstr;
+	return str;
 }
 
 Utils* utils = new Utils();
