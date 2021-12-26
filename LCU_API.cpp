@@ -27,6 +27,10 @@ LCU_API::LCU_API(EventHandleType event_handle_type):event_handle_type(event_hand
 }
 
 bool LCU_API::BindEvent(const std::string& method, EVENT_CALLBACK call_back) {
+	if (event_handle_type != BIND) {
+		std::cout << "event_handle_type is not bind" << std::endl;
+		return false;
+	}
 	if (!IsAPIServerConnected()) {
 		return false;
 	}
@@ -252,38 +256,6 @@ std::string LCU_API::url(const std::string &api) {
 	return prot[0] + host + api;
 }
 
-// 开始匹配
-bool LCU_API::StartQueue() {
-	if (!IsAPIServerConnected()) {
-		return false;
-	}
-	if (POST(url(startQueueApi), "").empty()) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
-// 创建房间
-bool LCU_API::BuildRoom(QueueID type) {
-	if (!IsAPIServerConnected()) {
-		return false;
-	}
-	std::string body = R"({"queueId":)" + std::to_string(static_cast<int>(type)) + "}";
-	return ResultCheck(POST(url(buildRoomApi), body), "canStartActivity", true);
-}
-
-// 创建云顶匹配房间
-bool LCU_API::BuildTFTNormalRoom() {
-	return BuildRoom(TFTNormal);
-}
-
-// 创建云顶排位房间
-bool LCU_API::BuildTFTRankRoom() {
-	return BuildRoom(TFTRanked);
-}
-
 std::string LCU_API::Request(const std::string& method, const std::string& url, const std::string& requestData, const std::string& header,
 	const std::string& cookies, const std::string& returnCookies, int port) {
 	std::string result = http_client.Request(method, url, requestData, header, cookies, returnCookies, port);
@@ -342,4 +314,61 @@ bool LCU_API::ResultCheck(const std::string& data, const std::string& attr, T ai
 		}
 	}
 	return ret;
+}
+
+// ==================EVENT==================
+bool LCU_API::OnJsonApiEvent_lol_lobby_v2_lobby(EVENT_CALLBACK create_call, EVENT_CALLBACK update_call, EVENT_CALLBACK delete_call) {
+	BindEvent("OnJsonApiEvent_lol-lobby_v2_lobby", [create_call, update_call, delete_call](Json::Value& data) {
+		if (data[2]["uri"] == "/lol-lobby/v2/lobby") {
+			if (data[2]["eventType"] == "Create") {
+				if (create_call) {
+					create_call(data);
+				}
+			}
+			else if (data[2]["eventType"] == "Update") {
+				if (update_call) {
+					update_call(data);
+				}
+			}
+			else if (data[2]["eventType"] == "Delete") {
+				if (delete_call) {
+					delete_call(data);
+				}
+			}
+		}
+	});
+}
+
+
+// ==================API==================
+// 开始匹配
+bool LCU_API::StartQueue() {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	if (POST(url(startQueueApi), "").empty()) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+// 创建房间
+bool LCU_API::BuildRoom(QueueID type) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	std::string body = R"({"queueId":)" + std::to_string(static_cast<int>(type)) + "}";
+	return ResultCheck(POST(url(buildRoomApi), body), "canStartActivity", true);
+}
+
+// 创建云顶匹配房间
+bool LCU_API::BuildTFTNormalRoom() {
+	return BuildRoom(TFTNormal);
+}
+
+// 创建云顶排位房间
+bool LCU_API::BuildTFTRankRoom() {
+	return BuildRoom(TFTRanked);
 }
