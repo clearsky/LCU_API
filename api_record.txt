@@ -10,3 +10,17 @@
 /lol-lobby/v1/parties/active unknow Forbidden 403
 /lol-lobby/v1/parties/gamemode 当前房间的游戏模式信息
 /lol-lobby/v1/parties/metadata 设置元信息,主要设置选路
+/lol-lobby/v1/parties/player 获取房间玩家的信息,还包含其他信息,在房间外也可以获取
+/lol-lobby/v1/parties/queue 切换房间模式
+/lol-lobby/v1/parties/ready 设置为0会出现一瞬间玩家尚未准备好
+/lol-lobby/v1/parties/{partyId}/members/{puuid}/role 改变房间中用户的角色,主要用来交出房主
+/lol-lobby/v1/party-rewards unkonow
+/lol-lobby/v1/tournaments/{}/join 可能是冠军杯赛
+/lol-lobby/v2/comms/members 获取房间内可聊天的playeri信息,比GetPartiedPlayer更轻量
+/lol-lobby/v2/comms/token 获取comm toke
+/lol-lobby/v2/eligibility/game-select-eligibility-hash unknow
+/lol-lobby/v2/eligibility/initial-configuration-complete unknow
+/lol-lobby/v2/eligibility/party 查询当前房间是否有资格转换到其他类型的房间
+/lol-lobby/v2/eligibility/self 自己能否创建某种类型的房间
+/lol-lobby/v2/eog-invitations unknow
+/lol-lobby/v2/lobby DELETE退出房间 GET获取房间信息 POST创建房间

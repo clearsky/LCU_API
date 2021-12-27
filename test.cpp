@@ -10,8 +10,9 @@ int main() {
 	});*/
 	LCU_API api(BIND);
 	api.Connect();
+	std::cout << api.CheckPartyEligibility(QueueID::DraftPick) << std::endl;
 	/*api.ExitRoom();*/
-	api.SetMetaData(PositionPref::FILL, PositionPref::FILL);
+	//api.SetMetaData(PositionPref::FILL, PositionPref::FILL);
 	
 	/*api.BindEvent("OnJsonApiEvent", [](Json::Value& data) {
 		std::cout << "==========all event============" << std::endl;

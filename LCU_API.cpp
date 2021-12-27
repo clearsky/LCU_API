@@ -393,7 +393,7 @@ bool LCU_API::StartQueue() {
 	if (!IsAPIServerConnected()) {
 		return false;
 	}
-	if (POST(url("/matchmaking/search"), "").empty()) {
+	if (POST(url("/lol-lobby/v2/lobby/matchmaking/search"), "").empty()) {
 		return true;
 	}
 	else {
@@ -492,9 +492,97 @@ Json::Value LCU_API::GetGameMode() {
 
 bool LCU_API::SetMetaData(PositionPref first, PositionPref second) {
 	const char* types[] = { "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY", "FILL", "UNSELECTED" };
-    char const* format = R"({"championSelection" : null,"positionPref" :["%s","%s"] ,"properties" : null,"skinSelection" : null})";
+	char const* format = R"({"championSelection" : null,"positionPref" :["%s","%s"] ,"properties" : null,"skinSelection" : null})";
 	char data[128];
 	sprintf_s(data, 128, format, types[static_cast<int>(first)], types[static_cast<int>(second)]);
 	std::string ret = PUT(url("/lol-lobby/v1/parties/metadata"), data);
 	return true;
+}
+
+Json::Value LCU_API::GetPartiedPlayer() {
+	std::string data = GET(url("/lol-lobby/v1/parties/player"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		if (!root["httpStatus"].asInt()) {
+			return root;
+		}
+	}
+	return NULL;
+}
+
+bool LCU_API::SetQueue(QueueID type) {
+	PUT(url("/lol-lobby/v1/parties/queue"), std::to_string(static_cast<int>(type)));
+	return true;
+}
+
+bool LCU_API::GiveLeaderRole(const char* party_id, const char* puuid) {
+	const char* format = "/lol-lobby/v1/parties/%s/members/%s/role";
+	char url_data[128];
+	sprintf_s(url_data, 128, format, party_id, puuid);
+	std::string ret = PUT(url(url_data), "LEADER");
+	if (ret.empty()) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+Json::Value LCU_API::GetCommsMembers() {
+	std::string data = GET(url("/lol-lobby/v2/comms/members"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		if (!root["httpStatus"].asInt()) {
+			return root;
+		}
+	}
+	return NULL;
+}
+
+std::string LCU_API::GetCommsToken() {
+	return GET(url("/lol-lobby/v2/comms/token"), "");
+}
+
+bool LCU_API::CheckPartyEligibility(QueueID type) {
+	std::string data = POST(url("/lol-lobby/v2/eligibility/party"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		if (root.isArray()) {
+			// ½âÎö
+			for (auto item : root) {
+				if (item["queueId"].asInt() == static_cast<int>(type)) {
+					return item["eligible"].asBool();
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool LCU_API::CheckSelfEligibility(QueueID type) {
+	std::string data = POST(url("/lol-lobby/v2/eligibility/self"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		if (root.isArray()) {
+			// ½âÎö
+			for (auto item : root) {
+				if (item["queueId"].asInt() == static_cast<int>(type)) {
+					return item["eligible"].asBool();
+				}
+			}
+		}
+	}
+	return false;
 }

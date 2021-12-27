@@ -99,4 +99,7 @@
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="api_record.txt" />
+  </ItemGroup>
 </Project>

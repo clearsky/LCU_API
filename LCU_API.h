@@ -31,7 +31,9 @@ namespace LCUAPI {
 		FILTER,
 		BIND
 	};
-
+	enum class PositionPref {
+		TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY, FILL, UNSELECTED
+	};
 class LCU_API
 	{
 	public:
@@ -73,7 +75,7 @@ class LCU_API
 		bool OnCloseRoom(EVENT_CALLBACK call_back);
 		bool OnUpdateRoom(EVENT_CALLBACK call_back);
 		// API
-		// lobby
+		// ============lobby===============
 		// /lol-lobby/v2/lobby
 		bool BuildRoom(QueueID type); 
 		bool BuildTFTNormalRoom(); 
@@ -90,7 +92,7 @@ class LCU_API
 		bool LobbyAvailability();
 
 		// /lol-lobby/v1/lobby/invitations
-		// 房间右下角的邀请信息
+		// 自定义房间右下角的邀请信息
 		Json::Value GetInvitations();
 
 		// /lol-lobby/v1/parties/gamemode
@@ -100,9 +102,34 @@ class LCU_API
 		// /lol-lobby/v1/parties/metadata
 		// 排位的时候选位置
 		bool SetMetaData(PositionPref first, PositionPref second);
+		
+		// /lol-lobby/v1/parties/player
+		// 获取房间玩家的信息,还包含其他信息,在房间外也可以获取
+		Json::Value GetPartiedPlayer();
 
+		// /lol-lobby/v1/parties/queue
+		// 切换房间模式
+		bool SetQueue(QueueID type);
 
-		bool StartQueue(); 
+		// /lol-lobby/v1/parties/{partyId}/members/{puuid}/role
+		// 转移房主
+		bool GiveLeaderRole(const char* party_id, const char* puuid);
+
+		// lol-lobby/v2/comms/members 
+		//  获取房间内可聊天的playeri信息,比GetPartiedPlayer更轻量
+		Json::Value GetCommsMembers();
+
+		// /lol-lobby/v2/comms/token 获取comm toke
+		std::string GetCommsToken();
+
+		// /lol-lobby/v2/eligibility/party 查询当前房间是否有资格转换到其他类型的房间
+		bool CheckPartyEligibility(QueueID type);
+
+		// /lol-lobby/v2/eligibility/self 自己能否创建某种类型的房间
+		bool CheckSelfEligibility(QueueID type);
+
+		bool StartQueue();
+
 };
 }
 

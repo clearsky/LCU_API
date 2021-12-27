@@ -92,9 +92,7 @@ enum class QueueID : const int
 	Tutorial3 = 2020,
 };
 
-enum class PositionPref {
-	TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY, FILL, UNSELECTED
-};
+
 
 
 struct Champ
