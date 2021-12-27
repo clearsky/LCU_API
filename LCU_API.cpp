@@ -410,14 +410,91 @@ bool LCU_API::BuildRoom(QueueID type) {
 }
 
 bool LCU_API::BuildTFTNormalRoom() {
-	return BuildRoom(TFTNormal);
+	return BuildRoom(QueueID::TFTNormal);
 }
 
 bool LCU_API::BuildTFTRankRoom() {
-	return BuildRoom(TFTRanked);
+	return BuildRoom(QueueID::TFTRanked);
 }
 
 bool LCU_API::ExitRoom() {
 	DELETe(url("/lol-lobby/v2/lobby"), "");
+	return true;
+}
+
+Json::Value LCU_API::GetRoom() {
+	std::string data = GET(url("/lol-lobby/v2/lobby"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		return root;
+	}
+	return NULL;
+}
+
+bool LCU_API::OpenTeam() {
+	std::string ret = PUT(url("/lol-lobby/v2/lobby/partyType"), R"("open")");
+	if (ret.empty()) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool LCU_API::CloseTeam() {
+	std::string ret = PUT(url("/lol-lobby/v2/lobby/partyType"), R"("closed")");
+	if (ret.empty()) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool LCU_API::LobbyAvailability() {
+	std::string ret = GET(url("/lol-lobby/v1/lobby/availability"), "");
+	if (ret == R"("Available")") {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+Json::Value LCU_API::GetInvitations() {
+	std::string data = GET(url("/lol-lobby/v1/lobby/invitations"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		return root;
+	}
+	return NULL;
+}
+
+Json::Value LCU_API::GetGameMode() {
+	std::string data = GET(url("/lol-lobby/v1/parties/gamemode"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		if (!root["httpStatus"].asInt()) {
+			return root;
+		}
+	}
+	return NULL;
+}
+
+bool LCU_API::SetMetaData(PositionPref first, PositionPref second) {
+	const char* types[] = { "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY", "FILL", "UNSELECTED" };
+    char const* format = R"({"championSelection" : null,"positionPref" :["%s","%s"] ,"properties" : null,"skinSelection" : null})";
+	char data[128];
+	sprintf_s(data, 128, format, types[static_cast<int>(first)], types[static_cast<int>(second)]);
+	std::string ret = PUT(url("/lol-lobby/v1/parties/metadata"), data);
 	return true;
 }

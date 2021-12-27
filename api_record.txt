@@ -1,0 +1,12 @@
+--------------------------plugin lol-lobby--------------------------
+/lol-lobby/v1/autofill-displayed unknow
+/lol-lobby/v1/clash unknow
+/lol-lobby/v1/custom-games 获取自定义对局信息
+/lol-lobby/v1/lobby/availability 判断是否在房间
+/lol-lobby/v1/lobby/countdown unknow
+/lol-lobby/v1/lobby/custom/.. 自定义相关
+/lol-lobby/v1/lobby/invitations 自定义房间右下角的邀请信息
+/lol-lobby/v1/lobby/members/localMember/position-preferences unknow 
+/lol-lobby/v1/parties/active unknow Forbidden 403
+/lol-lobby/v1/parties/gamemode 当前房间的游戏模式信息
+/lol-lobby/v1/parties/metadata 设置元信息,主要设置选路

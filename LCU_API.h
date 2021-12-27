@@ -73,10 +73,34 @@ class LCU_API
 		bool OnCloseRoom(EVENT_CALLBACK call_back);
 		bool OnUpdateRoom(EVENT_CALLBACK call_back);
 		// API
+		// lobby
+		// /lol-lobby/v2/lobby
 		bool BuildRoom(QueueID type); 
 		bool BuildTFTNormalRoom(); 
 		bool BuildTFTRankRoom(); 
 		bool ExitRoom();
+		Json::Value GetRoom();
+
+		// /lol-lobby/v2/lobby/partyType
+		bool OpenTeam();
+		bool CloseTeam();
+
+		// /lol-lobby/v1/lobby/availability
+		// 判断是否在房间
+		bool LobbyAvailability();
+
+		// /lol-lobby/v1/lobby/invitations
+		// 房间右下角的邀请信息
+		Json::Value GetInvitations();
+
+		// /lol-lobby/v1/parties/gamemode
+		// 获取当前房间的游戏模式信息
+		Json::Value GetGameMode();
+
+		// /lol-lobby/v1/parties/metadata
+		// 排位的时候选位置
+		bool SetMetaData(PositionPref first, PositionPref second);
+
 
 		bool StartQueue(); 
 };

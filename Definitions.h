@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <iostream>
-
+#include <string>
 #define RandomInt(min, max) (rand() % (max - min + 1) + min)
 
 struct ChampMinimal
@@ -70,7 +70,7 @@ struct Skin
 
 inline std::vector<Skin>ownedSkins;
 
-enum QueueID : const int
+enum class QueueID : const int
 {
 	DraftPick = 400,
 	SoloDuo = 420,
@@ -91,6 +91,11 @@ enum QueueID : const int
 	Tutorial2 = 2010,
 	Tutorial3 = 2020,
 };
+
+enum class PositionPref {
+	TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY, FILL, UNSELECTED
+};
+
 
 struct Champ
 {
