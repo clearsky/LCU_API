@@ -7,10 +7,10 @@
 #include "json/json.h"
 #include <vector>
 
-#define USE_LOG  // 请求后打印返回值和请求信息
+#define USE_LOG  // print log
 #ifdef USE_LOG
-//#define JSON_FORMAT // 格式化输出json
-#define USE_GBK // 避免在gbk环境中中文乱码
+//#define JSON_FORMAT // format json result
+#define USE_GBK // gbk log
 //#define LOG_ALL_EVENT
 #endif // USE_LOG
 
@@ -18,7 +18,7 @@
 
 namespace LCUAPI {
 
-	typedef std::function<void(Json::Value& data)> CALLBACK EVENT_CALLBACK;
+	typedef std::function<void (Json::Value& data)>  EVENT_CALLBACK;
 
 	enum EventType {
 		CREATE,
@@ -39,12 +39,10 @@ class LCU_API
 		~LCU_API();
 	private:
 		EventHandleType event_handle_type;
-		std::string buildRoomApi;
-		std::string startQueueApi;
 	public:
 		std::unordered_map<std::string, EVENT_CALLBACK[3]> filter;
 		std::unordered_map<std::string, EVENT_CALLBACK> bind;
-		//std::unordered_map<bool(LCU_API::*)(EVENT_CALLBACK, EVENT_CALLBACK, EVENT_CALLBACK), EVENT_CALLBACK[3]> binded_event;
+		std::unordered_map<std::string, EVENT_CALLBACK[3]> binded_event;
 		Auth auth;
 		web::websockets::client::websocket_callback_client *ws_client;
 		HTTP http_client;
@@ -55,28 +53,32 @@ class LCU_API
 		std::function<std::string(const std::string&, const std::string&)> POST;
 		std::function<std::string(const std::string&, const std::string&)> PUT;
 		std::function<std::string(const std::string&, const std::string&)> DELETe;
-	private:
-		bool Connect();
+
 	public:
+		bool Connect();
 		void HandleEventMessage(web::websockets::client::websocket_incoming_message& msg);
-		bool BindEvent(const std::string & method, EVENT_CALLBACK call_back);
+		bool BindEvent(const std::string & method, EVENT_CALLBACK call_back, bool force=false);
 		bool UnBindEvent(const std::string & method);
 		bool AddEventFilter(const std::string &uri, EventType type, EVENT_CALLBACK call_back);
 		bool RemoveEventFilter(const std::string &uri, EventType type);
-		bool IsAPIServerConnected(); // api是否连接
+		bool IsAPIServerConnected(); // api is connected
 		template<typename T>
-		bool ResultCheck(const std::string& data,const std::string& attr, T aim); // 返回值检查
+		bool ResultCheck(const std::string& data,const std::string& attr, T aim); // check result
 		std::string url(const std::string& api);
 		std::string Request(const std::string &method, const std::string &url, const std::string &requestData = "", const std::string &header = "",
 			const std::string& cookies = "", const std::string &returnCookies = "", int port = -1);
-
+		bool BindEventAuto(const std::string& event_name, const std::string& uri);
 		// EVENT
-		bool OnJsonApiEvent_lol_lobby_v2_lobby(EVENT_CALLBACK create_call = nullptr, EVENT_CALLBACK update_call = nullptr, EVENT_CALLBACK delete_call = nullptr);
+		bool OnCreateRoom(EVENT_CALLBACK call_back);
+		bool OnCloseRoom(EVENT_CALLBACK call_back);
+		bool OnUpdateRoom(EVENT_CALLBACK call_back);
 		// API
-		bool BuildRoom(QueueID type); // 创建房间
-		bool BuildTFTNormalRoom(); // 创建云顶匹配
-		bool BuildTFTRankRoom(); // 创建云顶排位
-		bool StartQueue(); // 开始匹配
+		bool BuildRoom(QueueID type); 
+		bool BuildTFTNormalRoom(); 
+		bool BuildTFTRankRoom(); 
+		bool ExitRoom();
+
+		bool StartQueue(); 
 };
 }
 

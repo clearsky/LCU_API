@@ -1,4 +1,6 @@
 #include "LCU_API.h"
+#include <thread>
+#include <fstream>
 
 using namespace LCUAPI;
 int main() {
@@ -7,10 +9,29 @@ int main() {
 		std::cout << "The summoner " << data[2]["data"]["displayName"] << " was updated." << std::endl;
 	});*/
 	LCU_API api(BIND);
-	api.OnJsonApiEvent_lol_lobby_v2_lobby(
-		[](Json::Value data) {::MessageBoxA(0, "create room", 0, 0);}, 
-		nullptr, 
-		[](Json::Value data) {::MessageBoxA(0, "delete room", 0, 0);});
-	api.BuildTFTRankRoom();
+	api.Connect();
+	if (api.BuildTFTNormalRoom()) {
+		std::cout << "build ok" << std::endl;
+	}
+	
+	/*api.BindEvent("OnJsonApiEvent", [](Json::Value& data) {
+		std::cout << "==========all event============" << std::endl;
+		std::cout << data.toStyledString() << std::endl;
+		std::ofstream out("ret.txt", std::ios::app);
+		out << data.toStyledString();
+	});*/
+	//api.OnCreateRoom([](Json::Value& data) {
+	//	::MessageBoxA(0, "room created", 0, 0);
+	//});
+	//api.OnCloseRoom([](Json::Value& data) {
+	//	::MessageBoxA(0, "close created", 0, 0);
+	//});
+	//while (1) {
+	//	if (!api.connected) {
+	//		api.Connect();
+	//	}
+	//	Sleep(1000);
+	//}
 	system("pause");
+	
 }

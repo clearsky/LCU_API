@@ -22,27 +22,29 @@ LCU_API::LCU_API(EventHandleType event_handle_type):event_handle_type(event_hand
 	host = "127.0.0.1";
 	prot[0] = "https://";
 	prot[1] = "wss://";
-	buildRoomApi = "/lol-lobby/v2/lobby";
-	startQueueApi = "/matchmaking/search";
 }
 
-bool LCU_API::BindEvent(const std::string& method, EVENT_CALLBACK call_back) {
+bool LCU_API::BindEvent(const std::string& method, EVENT_CALLBACK call_back, bool force) {
 	if (event_handle_type != BIND) {
 		std::cout << "event_handle_type is not bind" << std::endl;
 		return false;
 	}
-	if (!IsAPIServerConnected()) {
-		return false;
+	bind[method] = call_back;
+	if (!force) {
+		if (!IsAPIServerConnected()) {
+			return false;
+		}
 	}
+	
 	websocket_outgoing_message msg;
 	char msg_buffer[128];
 	sprintf_s(msg_buffer, 128, "[5, \"%s\"]", method.data());
 	msg.set_utf8_message(msg_buffer);
-	auto sub_ret = ws_client->send(msg).then([&method]() {
+	auto sub_ret = ws_client->send(msg).then([method]() {
 		std::cout << "subscrib " << method <<std::endl;
 	});
 	sub_ret.wait();
-	bind[method] = call_back;
+	
 	return true;
 }
 
@@ -118,12 +120,40 @@ bool LCU_API::RemoveEventFilter(const std::string &uri, EventType type) {
 }
 // 连接LCU
 bool LCU_API::Connect() {
-	if (!auth.GetLeagueClientInfo()) {
-		return false;
+	connected = false;
+	try {
+		if (!auth.GetLeagueClientInfo()) {
+			return connected;
+		}
+
+		auto request_call = &LCU_API::Request;
+		auto obj = this;
+		GET = std::bind(request_call, obj, "GET", std::placeholders::_1,
+			std::placeholders::_2, auth.leagueHeader, "", "", auth.leaguePort);
+		POST = std::bind(request_call, obj, "POST", std::placeholders::_1,
+			std::placeholders::_2, auth.leagueHeader, "", "", auth.leaguePort);
+		PUT = std::bind(request_call, obj, "PUT", std::placeholders::_1,
+			std::placeholders::_2, auth.leagueHeader, "", "", auth.leaguePort);
+		DELETe = std::bind(request_call, obj, "DELETE", std::placeholders::_1,
+			std::placeholders::_2, auth.leagueHeader, "", "", auth.leaguePort);
+
+		// check lol client is ready
+		std::string load_ok_str = GET(url("/memory/v1/fe-processes-ready"), "");
+		if (load_ok_str != "true") {
+			return connected;
+		}
+
 	}
+	catch (...) {
+		return connected;
+	}
+	
+	// clear old wss_client
 	if (ws_client) {
 		delete ws_client;
+		ws_client = nullptr;
 	}
+	// create a new wss_client
 	websocket_client_config ws_config;
 	ws_config.set_validate_certificates(false);
 	std::string auth_str = "Basic ";
@@ -135,10 +165,20 @@ bool LCU_API::Connect() {
 	std::string ws_str = prot[1] + host + ":" + std::to_string(auth.leaguePort);
 	wchar_t* ws_wstr = CA2W(ws_str.c_str());
 	try {
-		auto con_ret = ws_client->connect(ws_wstr).then([]() {
+		// connect with lcu
+		auto con_ret = ws_client->connect(ws_wstr).then([this]() {
+			connected = true;
 			std::cout << "wss connected" << std::endl;
 		});
 		con_ret.wait();
+
+		ws_client->set_message_handler([this](websocket_incoming_message msg) {
+			this->HandleEventMessage(msg);
+			});
+		ws_client->set_close_handler([this](websocket_close_status close_status, const utility::string_t& reason, const std::error_code& error) {
+			this->connected = false;
+			std::cout << "wss connect closed" << std::endl;
+			});
 
 		if (event_handle_type == FILTER) {
 			websocket_outgoing_message msg;
@@ -148,26 +188,24 @@ bool LCU_API::Connect() {
 				});
 			sub_ret.wait();
 		}
-
-		ws_client->set_message_handler([this](websocket_incoming_message msg){
-			this->HandleEventMessage(msg);
-		});
-		ws_client->set_close_handler([this](websocket_close_status close_status,const utility::string_t& reason,const std::error_code& error) {
-			this->connected = false;
-			std::cout << "wss connect closed" << std::endl;
-		});
+		else if (event_handle_type == BIND) { // rebind events
+			for (auto item : bind) {
+				BindEvent(item.first, item.second,true);
+			}
+		}
 	}
 	catch (websocket_exception const& ex) {
-		std::cout << ex.what() << std::endl;
-		return false;
+		std::cout << "wss error:" << ex.what() << std::endl;
+		return connected;
 	}
-	return true;
+	return connected;
 }
 
 void LCU_API::HandleEventMessage(websocket_incoming_message& msg) {
 	if (!msg.length()) {
 		return;
 	}
+	
 	bool need_handle = false;
 	std::string msg_str = msg.extract_string().get();
 	Json::CharReaderBuilder builder;
@@ -228,30 +266,13 @@ void LCU_API::HandleEventMessage(websocket_incoming_message& msg) {
 	
 }
 
-// 检测是否连接LCU
 bool LCU_API::IsAPIServerConnected() {
-	if (!connected) {
-		connected = Connect();
-		if (connected) {
-			auto request_call = &LCU_API::Request;
-			auto obj = this;
-			GET = std::bind(request_call, obj, "GET", std::placeholders::_1,
-				std::placeholders::_2, auth.leagueHeader, "", "", auth.leaguePort);
-			POST = std::bind(request_call, obj, "POST", std::placeholders::_1,
-				std::placeholders::_2, auth.leagueHeader, "", "", auth.leaguePort);
-			PUT = std::bind(request_call, obj, "PUT", std::placeholders::_1,
-				std::placeholders::_2, auth.leagueHeader, "", "", auth.leaguePort);
-			DELETe = std::bind(request_call, obj, "DELETE", std::placeholders::_1,
-				std::placeholders::_2, auth.leagueHeader, "", "", auth.leaguePort);
-		}
-	}
 	if (!connected) {
 		std::cout << "lcu not connected" << std::endl;
 	}
 	return connected;
 }
 
-// URL拼接
 std::string LCU_API::url(const std::string &api) {
 	return prot[0] + host + api;
 }
@@ -293,7 +314,6 @@ std::string LCU_API::Request(const std::string& method, const std::string& url, 
 template<typename T>
 bool LCU_API::ResultCheck(const std::string& data, const std::string& attr, T aim) {
 	bool ret = false;
-	// 检测结果
 	if (!data.empty())
 	{
 		Json::CharReaderBuilder builder;
@@ -317,36 +337,63 @@ bool LCU_API::ResultCheck(const std::string& data, const std::string& attr, T ai
 }
 
 // ==================EVENT==================
-bool LCU_API::OnJsonApiEvent_lol_lobby_v2_lobby(EVENT_CALLBACK create_call, EVENT_CALLBACK update_call, EVENT_CALLBACK delete_call) {
-	BindEvent("OnJsonApiEvent_lol-lobby_v2_lobby", [create_call, update_call, delete_call](Json::Value& data) {
-		if (data[2]["uri"] == "/lol-lobby/v2/lobby") {
+bool LCU_API::BindEventAuto(const std::string& event_name,const std::string& uri) {
+	if (binded_event.find(event_name) == binded_event.end()) {
+		binded_event[event_name][0] = nullptr;
+		binded_event[event_name][1] = nullptr;
+		binded_event[event_name][2] = nullptr;
+	}
+	else {
+		return true;
+	}
+	return BindEvent(event_name, [this,event_name,uri](Json::Value& data) {
+		if (data[2]["uri"] == uri) {
 			if (data[2]["eventType"] == "Create") {
-				if (create_call) {
-					create_call(data);
+				if (this->binded_event[event_name][0]) {
+					this->binded_event[event_name][0](data);
 				}
 			}
 			else if (data[2]["eventType"] == "Update") {
-				if (update_call) {
-					update_call(data);
+				if (this->binded_event[event_name][1]) {
+					this->binded_event[event_name][1](data);
 				}
 			}
 			else if (data[2]["eventType"] == "Delete") {
-				if (delete_call) {
-					delete_call(data);
+				if (this->binded_event[event_name][2]) {
+					this->binded_event[event_name][2](data);
 				}
 			}
 		}
 	});
 }
 
+bool LCU_API::OnCreateRoom(EVENT_CALLBACK call_back) {
+	std::string event_name = "OnJsonApiEvent_lol-lobby_v2_lobby";
+	bool ret = BindEventAuto(event_name, "/lol-lobby/v2/lobby");
+	binded_event[event_name][0] = call_back;
+	return ret;
+}
+
+bool LCU_API::OnCloseRoom(EVENT_CALLBACK call_back) {
+	std::string event_name = "OnJsonApiEvent_lol-lobby_v2_lobby";
+	bool ret = BindEventAuto(event_name, "/lol-lobby/v2/lobby");
+	binded_event[event_name][2] = call_back;
+	return ret;
+}
+
+bool LCU_API::OnUpdateRoom(EVENT_CALLBACK call_back) {
+	std::string event_name = "OnJsonApiEvent_lol-lobby_v2_lobby";
+	bool ret = BindEventAuto(event_name, "/lol-lobby/v2/lobby");
+	binded_event[event_name][1] = call_back;
+	return ret;
+}
 
 // ==================API==================
-// 开始匹配
 bool LCU_API::StartQueue() {
 	if (!IsAPIServerConnected()) {
 		return false;
 	}
-	if (POST(url(startQueueApi), "").empty()) {
+	if (POST(url("/matchmaking/search"), "").empty()) {
 		return true;
 	}
 	else {
@@ -354,21 +401,23 @@ bool LCU_API::StartQueue() {
 	}
 }
 
-// 创建房间
 bool LCU_API::BuildRoom(QueueID type) {
 	if (!IsAPIServerConnected()) {
 		return false;
 	}
 	std::string body = R"({"queueId":)" + std::to_string(static_cast<int>(type)) + "}";
-	return ResultCheck(POST(url(buildRoomApi), body), "canStartActivity", true);
+	return ResultCheck(POST(url("/lol-lobby/v2/lobby"), body), "errorCode", NULL);
 }
 
-// 创建云顶匹配房间
 bool LCU_API::BuildTFTNormalRoom() {
 	return BuildRoom(TFTNormal);
 }
 
-// 创建云顶排位房间
 bool LCU_API::BuildTFTRankRoom() {
 	return BuildRoom(TFTRanked);
+}
+
+bool LCU_API::ExitRoom() {
+	DELETe(url("/lol-lobby/v2/lobby"), "");
+	return true;
 }
