@@ -25,7 +25,7 @@ LCU_API::LCU_API(EventHandleType event_handle_type):event_handle_type(event_hand
 }
 
 bool LCU_API::BindEvent(const std::string& method, EVENT_CALLBACK call_back, bool force) {
-	if (event_handle_type != BIND) {
+	if (event_handle_type != EventHandleType::BIND) {
 		std::cout << "event_handle_type is not bind" << std::endl;
 		return false;
 	}
@@ -66,19 +66,19 @@ bool LCU_API::UnBindEvent(const std::string& method) {
 }
 
 bool LCU_API::AddEventFilter(const std::string &uri, EventType type, EVENT_CALLBACK call_back) {
-	if (event_handle_type != FILTER) {
+	if (event_handle_type != EventHandleType::FILTER) {
 		std::cout << "event_handle_type is not filter" << std::endl;
 		return false;
 	}
 	switch (type)
 	{
-	case CREATE:
+	case EventType::CREATE:
 		filter[uri][0] = call_back;
 		break;
-	case UPDATE:
+	case EventType::UPDATE:
 		filter[uri][1] = call_back;
 		break;
-	case DEL:
+	case EventType::DEL:
 		filter[uri][2] = call_back;
 		break;
 	default:
@@ -93,16 +93,16 @@ bool LCU_API::RemoveEventFilter(const std::string &uri, EventType type) {
 	}
 	switch (type)
 	{
-	case CREATE:
+	case EventType::CREATE:
 		filter.at(uri)[0] = nullptr;
 		break;
-	case UPDATE:
+	case EventType::UPDATE:
 		filter.at(uri)[1] = nullptr;
 		break;
-	case DEL:
+	case EventType::DEL:
 		filter.at(uri)[2] = nullptr;
 		break;
-	case ALL:
+	case EventType::ALL:
 		filter.at(uri)[0] = nullptr;
 		filter.at(uri)[1] = nullptr;
 		filter.at(uri)[2] = nullptr;
@@ -180,7 +180,7 @@ bool LCU_API::Connect() {
 			std::cout << "wss connect closed" << std::endl;
 			});
 
-		if (event_handle_type == FILTER) {
+		if (event_handle_type == EventHandleType::FILTER) {
 			websocket_outgoing_message msg;
 			msg.set_utf8_message("[5, \"OnJsonApiEvent\"]");
 			auto sub_ret = ws_client->send(msg).then([]() {
@@ -188,7 +188,7 @@ bool LCU_API::Connect() {
 				});
 			sub_ret.wait();
 		}
-		else if (event_handle_type == BIND) { // rebind events
+		else if (event_handle_type == EventHandleType::BIND) { // rebind events
 			for (auto item : bind) {
 				BindEvent(item.first, item.second,true);
 			}
@@ -214,7 +214,7 @@ void LCU_API::HandleEventMessage(websocket_incoming_message& msg) {
 	Json::Value root;
 	if (!reader->parse(msg_str.c_str(), msg_str.c_str() + static_cast<int>(msg_str.length() - 1), &root, &err)) {
 		if (root[0].asInt() == 8) {
-			if (event_handle_type == FILTER) {
+			if (event_handle_type == EventHandleType::FILTER) {
 				std::string uri = root[2]["uri"].asString();
 				if (filter.find(uri) != filter.end()) {
 					int type_index = -1;
@@ -236,7 +236,7 @@ void LCU_API::HandleEventMessage(websocket_incoming_message& msg) {
 					}
 				}
 			}
-			else if (event_handle_type == BIND) {
+			else if (event_handle_type == EventHandleType::BIND) {
 				std::string method = root[1].asString();
 				if (bind.find(method) != bind.end()) {
 					need_handle = true;
@@ -389,18 +389,6 @@ bool LCU_API::OnUpdateRoom(EVENT_CALLBACK call_back) {
 }
 
 // ==================API==================
-bool LCU_API::StartQueue() {
-	if (!IsAPIServerConnected()) {
-		return false;
-	}
-	if (POST(url("/lol-lobby/v2/lobby/matchmaking/search"), "").empty()) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
 bool LCU_API::BuildRoom(QueueID type) {
 	if (!IsAPIServerConnected()) {
 		return false;
@@ -583,6 +571,117 @@ bool LCU_API::CheckSelfEligibility(QueueID type) {
 				}
 			}
 		}
+	}
+	return false;
+}
+
+Json::Value LCU_API::GetLobbyInvitations() {
+	std::string data = GET(url("/lol-lobby/v2/lobby/invitations"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+			if (root.isArray()) {
+				return root;
+			}
+		}
+	}
+	return NULL;
+}
+
+bool LCU_API::InviteBySummonerIdS(std::vector<long long> ids) {
+	const char* format_out = "[]";
+	const char* format_in = R"({"toSummonerId":%u},)";
+	char row_data[32];
+	std::string data = "[";
+	for (long long item : ids) {
+		sprintf_s(row_data, 32, format_in, item);
+		data += row_data;
+	}
+	data = data.substr(0, data.length() - 1);
+	data += "]";
+	std::string ret = POST(url("/lol-lobby/v2/lobby/invitations"), data);
+	if (ret.find("[") != -1) {
+		return true;
+	}
+	return false;
+}
+
+
+bool LCU_API::StartQueue() {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	if (POST(url("/lol-lobby/v2/lobby/matchmaking/search"), "").empty()) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool LCU_API::StopQueue() {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	if (DELETe(url("/lol-lobby/v2/lobby/matchmaking/search"), "").empty()) {
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+
+SearchState LCU_API::GetSearchState() {
+	std::string data = GET(url("/lol-lobby/v2/lobby/matchmaking/search-state"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		if (!root["httpStatus"].asInt()) {
+			std::string state = root["searchState"].asString();
+
+			if (state == "Invalid") {
+				return SearchState::Invalid;
+			}
+			else if (state == "Searching") {
+				return SearchState::Searching;
+			}
+			else if (state == "Found") {
+				return SearchState::Found;
+			}
+		}
+	}
+	return SearchState::Invalid;
+}
+
+Json::Value LCU_API::GetLobbyMembers() {
+	std::string data = GET(url("/lol-lobby/v2/lobby/members"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+			if (root.isArray()) {
+				return root;
+			}
+		}
+	}
+	return NULL;
+}
+
+bool LCU_API::SetPositionPreferences(PositionPref first, PositionPref second) {
+	const char* types[] = { "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY", "FILL", "UNSELECTED" };
+	const char* format = R"({"firstPreference": "%s","secondPreference": "%s"})";
+	char data[128];
+	sprintf_s(data, 128, format, types[static_cast<int>(first)], types[static_cast<int>(second)]);
+	std::string ret = PUT(url("/lol-lobby/v2/lobby/members/localMember/position-preferences"), data);
+	if (ret.empty()) {
+		return true;
 	}
 	return false;
 }

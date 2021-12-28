@@ -8,9 +8,11 @@ int main() {
 	api.AddEventFilter("/lol-summoner/v1/current-summoner", UPDATE, (EVENT_CALLBACK)[](Json::Value &data) {
 		std::cout << "The summoner " << data[2]["data"]["displayName"] << " was updated." << std::endl;
 	});*/
-	LCU_API api(BIND);
+	LCU_API api(EventHandleType::BIND);
 	api.Connect();
-	std::cout << api.CheckPartyEligibility(QueueID::DraftPick) << std::endl;
+	std::vector<long long> t;
+	t.push_back(2928995660);
+	std::cout << api.SetPositionPreferences(PositionPref::TOP, PositionPref::BOTTOM) << std::endl;
 	/*api.ExitRoom();*/
 	//api.SetMetaData(PositionPref::FILL, PositionPref::FILL);
 	

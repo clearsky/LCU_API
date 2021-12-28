@@ -24,3 +24,7 @@
 /lol-lobby/v2/eligibility/self 自己能否创建某种类型的房间
 /lol-lobby/v2/eog-invitations unknow
 /lol-lobby/v2/lobby DELETE退出房间 GET获取房间信息 POST创建房间
+/lol-lobby/v2/lobby/invitations GET房间右下角邀请信息 POST邀请
+/lol-lobby/v2/lobby/matchmaking/search POST开始匹配 DELETE终止匹配 
+/lol-lobby/v2/lobby/members 获取房间内玩家信息
+/lol-lobby/v2/lobby/members/localMember/position-preferences 设置排位预选位
