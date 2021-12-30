@@ -1,6 +1,7 @@
 #include "LCU_API.h"
 #include <thread>
 #include <fstream>
+#include "Utils.h"
 
 using namespace LCUAPI;
 int main() {
@@ -10,9 +11,15 @@ int main() {
 	});*/
 	LCU_API api(EventHandleType::BIND);
 	api.Connect();
-	std::vector<long long> t;
-	t.push_back(2928995660);
-	std::cout << api.SetPositionPreferences(PositionPref::TOP, PositionPref::BOTTOM) << std::endl;
+	Json::Value data = api.GetAllGridChampions();
+	int count = 0;
+	for (auto item : data) {
+		std::cout << "id:" << item["id"].asInt() << " ";
+		std::cout << "name:" << utils->UtfToGbk(item["name"].asString().c_str()) << std::endl;
+		++count;
+	}
+	std::cout << "count:" << count << std::endl;
+
 	/*api.ExitRoom();*/
 	//api.SetMetaData(PositionPref::FILL, PositionPref::FILL);
 	

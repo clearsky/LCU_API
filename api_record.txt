@@ -28,3 +28,25 @@
 /lol-lobby/v2/lobby/matchmaking/search POST开始匹配 DELETE终止匹配 
 /lol-lobby/v2/lobby/members 获取房间内玩家信息
 /lol-lobby/v2/lobby/members/localMember/position-preferences 设置排位预选位
+/lol-lobby/v2/lobby/members/{summoner ID}/grant-invite 授予邀请权限
+/lol-lobby/v2/lobby/members/{summoner ID}/kick 踢出房间
+/lol-lobby/v2/lobby/members/{summoner ID}/promote 转移房主权限
+/lol-lobby/v2/lobby/members/{summoner ID}/revoke-invite 收回邀请权限
+/lol-lobby/v2/lobby/partyType 设置小队状态
+/lol-lobby/v2/lobby/team/{team} unknow
+/lol-lobby/v2/matchmaking/quick-search 快速开始游戏,无效
+/lol-lobby/v2/notifications unkonow
+/lol-lobby/v2/party-active 是否在房间中
+/lol-lobby/v2/party/eog-status unkonw
+/lol-lobby/v2/party/{party id}/join forbidden
+/lol-lobby/v2/play-again 再玩一次
+/lol-lobby/v2/play-again-decline 禁用再来一次按钮
+/lol-lobby/v2/received-invitations 被邀请信息
+/lol-lobby/v2/received-invitations/{invitationId}/accept // 接受邀请
+/lol-lobby/v2/received-invitations/{invitationId}/decline // 拒绝邀请
+/lol-lobby/v2/registration-status unkonow
+--------------------------plugin lol-champ-select--------------------------
+/lol-champ-select/v1/all-grid-champions 获取所有英雄信息
+/lol-champ-select/v1/bannable-champion-ids 可以ban的英雄列表
+/lol-champ-select/v1/battle-training/launch unkonw
+/lol-champ-select/v1/current-champion 当前选择的英雄ID

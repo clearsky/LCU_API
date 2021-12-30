@@ -49,6 +49,9 @@ bool LCU_API::BindEvent(const std::string& method, EVENT_CALLBACK call_back, boo
 }
 
 bool LCU_API::UnBindEvent(const std::string& method) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	auto index = bind.find(method);
 	if (index == bind.end()) {
 		return true;
@@ -205,7 +208,6 @@ void LCU_API::HandleEventMessage(websocket_incoming_message& msg) {
 	if (!msg.length()) {
 		return;
 	}
-	
 	bool need_handle = false;
 	std::string msg_str = msg.extract_string().get();
 	Json::CharReaderBuilder builder;
@@ -406,11 +408,17 @@ bool LCU_API::BuildTFTRankRoom() {
 }
 
 bool LCU_API::ExitRoom() {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	DELETe(url("/lol-lobby/v2/lobby"), "");
 	return true;
 }
 
 Json::Value LCU_API::GetRoom() {
+	if (!IsAPIServerConnected()) {
+		return NULL;
+	}
 	std::string data = GET(url("/lol-lobby/v2/lobby"), "");
 	Json::CharReaderBuilder builder;
 	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
@@ -423,6 +431,9 @@ Json::Value LCU_API::GetRoom() {
 }
 
 bool LCU_API::OpenTeam() {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	std::string ret = PUT(url("/lol-lobby/v2/lobby/partyType"), R"("open")");
 	if (ret.empty()) {
 		return true;
@@ -433,6 +444,9 @@ bool LCU_API::OpenTeam() {
 }
 
 bool LCU_API::CloseTeam() {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	std::string ret = PUT(url("/lol-lobby/v2/lobby/partyType"), R"("closed")");
 	if (ret.empty()) {
 		return true;
@@ -443,6 +457,9 @@ bool LCU_API::CloseTeam() {
 }
 
 bool LCU_API::LobbyAvailability() {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	std::string ret = GET(url("/lol-lobby/v1/lobby/availability"), "");
 	if (ret == R"("Available")") {
 		return true;
@@ -453,6 +470,9 @@ bool LCU_API::LobbyAvailability() {
 }
 
 Json::Value LCU_API::GetInvitations() {
+	if (!IsAPIServerConnected()) {
+		return NULL;
+	}
 	std::string data = GET(url("/lol-lobby/v1/lobby/invitations"), "");
 	Json::CharReaderBuilder builder;
 	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
@@ -465,6 +485,9 @@ Json::Value LCU_API::GetInvitations() {
 }
 
 Json::Value LCU_API::GetGameMode() {
+	if (!IsAPIServerConnected()) {
+		return NULL;
+	}
 	std::string data = GET(url("/lol-lobby/v1/parties/gamemode"), "");
 	Json::CharReaderBuilder builder;
 	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
@@ -479,6 +502,9 @@ Json::Value LCU_API::GetGameMode() {
 }
 
 bool LCU_API::SetMetaData(PositionPref first, PositionPref second) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	const char* types[] = { "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY", "FILL", "UNSELECTED" };
 	char const* format = R"({"championSelection" : null,"positionPref" :["%s","%s"] ,"properties" : null,"skinSelection" : null})";
 	char data[128];
@@ -488,6 +514,9 @@ bool LCU_API::SetMetaData(PositionPref first, PositionPref second) {
 }
 
 Json::Value LCU_API::GetPartiedPlayer() {
+	if (!IsAPIServerConnected()) {
+		return NULL;
+	}
 	std::string data = GET(url("/lol-lobby/v1/parties/player"), "");
 	Json::CharReaderBuilder builder;
 	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
@@ -502,11 +531,17 @@ Json::Value LCU_API::GetPartiedPlayer() {
 }
 
 bool LCU_API::SetQueue(QueueID type) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	PUT(url("/lol-lobby/v1/parties/queue"), std::to_string(static_cast<int>(type)));
 	return true;
 }
 
 bool LCU_API::GiveLeaderRole(const char* party_id, const char* puuid) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	const char* format = "/lol-lobby/v1/parties/%s/members/%s/role";
 	char url_data[128];
 	sprintf_s(url_data, 128, format, party_id, puuid);
@@ -520,6 +555,9 @@ bool LCU_API::GiveLeaderRole(const char* party_id, const char* puuid) {
 }
 
 Json::Value LCU_API::GetCommsMembers() {
+	if (!IsAPIServerConnected()) {
+		return NULL;
+	}
 	std::string data = GET(url("/lol-lobby/v2/comms/members"), "");
 	Json::CharReaderBuilder builder;
 	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
@@ -534,10 +572,16 @@ Json::Value LCU_API::GetCommsMembers() {
 }
 
 std::string LCU_API::GetCommsToken() {
+	if (!IsAPIServerConnected()) {
+		return "";
+	}
 	return GET(url("/lol-lobby/v2/comms/token"), "");
 }
 
 bool LCU_API::CheckPartyEligibility(QueueID type) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	std::string data = POST(url("/lol-lobby/v2/eligibility/party"), "");
 	Json::CharReaderBuilder builder;
 	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
@@ -557,6 +601,9 @@ bool LCU_API::CheckPartyEligibility(QueueID type) {
 }
 
 bool LCU_API::CheckSelfEligibility(QueueID type) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	std::string data = POST(url("/lol-lobby/v2/eligibility/self"), "");
 	Json::CharReaderBuilder builder;
 	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
@@ -576,6 +623,9 @@ bool LCU_API::CheckSelfEligibility(QueueID type) {
 }
 
 Json::Value LCU_API::GetLobbyInvitations() {
+	if (!IsAPIServerConnected()) {
+		return NULL;
+	}
 	std::string data = GET(url("/lol-lobby/v2/lobby/invitations"), "");
 	Json::CharReaderBuilder builder;
 	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
@@ -592,6 +642,9 @@ Json::Value LCU_API::GetLobbyInvitations() {
 }
 
 bool LCU_API::InviteBySummonerIdS(std::vector<long long> ids) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	const char* format_out = "[]";
 	const char* format_in = R"({"toSummonerId":%u},)";
 	char row_data[32];
@@ -635,6 +688,9 @@ bool LCU_API::StopQueue() {
 }
 
 SearchState LCU_API::GetSearchState() {
+	if (!IsAPIServerConnected()) {
+		return SearchState::Invalid;
+	}
 	std::string data = GET(url("/lol-lobby/v2/lobby/matchmaking/search-state"), "");
 	Json::CharReaderBuilder builder;
 	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
@@ -659,22 +715,26 @@ SearchState LCU_API::GetSearchState() {
 }
 
 Json::Value LCU_API::GetLobbyMembers() {
+	if (!IsAPIServerConnected()) {
+		return NULL;
+	}
 	std::string data = GET(url("/lol-lobby/v2/lobby/members"), "");
 	Json::CharReaderBuilder builder;
 	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
 	JSONCPP_STRING err;
 	Json::Value root;
 	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
-		if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
-			if (root.isArray()) {
-				return root;
-			}
+		if (root.isArray()) {
+			return root;
 		}
 	}
 	return NULL;
 }
 
 bool LCU_API::SetPositionPreferences(PositionPref first, PositionPref second) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	const char* types[] = { "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY", "FILL", "UNSELECTED" };
 	const char* format = R"({"firstPreference": "%s","secondPreference": "%s"})";
 	char data[128];
@@ -684,4 +744,190 @@ bool LCU_API::SetPositionPreferences(PositionPref first, PositionPref second) {
 		return true;
 	}
 	return false;
+}
+
+bool LCU_API::GrantInviteBySummonerId(long long id) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	const char* format = "/lol-lobby/v2/lobby/members/%u/grant-invite";
+	char url_buffer[64];
+	sprintf_s(url_buffer, 64, format, id);
+	std::string ret = POST(url(url_buffer), "");
+	if (ret == std::to_string(id)) {
+		return true;
+	}
+	return false;
+}
+
+bool LCU_API::KickSummonerBySummonerId(long long id) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	const char* format = "/lol-lobby/v2/lobby/members/%u/kick";
+	char url_buffer[64];
+	sprintf_s(url_buffer, 64, format, id);
+	std::string ret = POST(url(url_buffer), "");
+	if (ret == std::to_string(id)) {
+		return true;
+	}
+	return false;
+}
+
+bool LCU_API::PromoteSummonerBySummonerId(long long id) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	const char* format = "/lol-lobby/v2/lobby/members/%u/promote";
+	char url_buffer[64];
+	sprintf_s(url_buffer, 64, format, id);
+	std::string ret = POST(url(url_buffer), "");
+	if (ret == std::to_string(id)) {
+		return true;
+	}
+	return false;
+}
+
+bool LCU_API::RevokeInviteBySummonerId(long long id) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	const char* format = "/lol-lobby/v2/lobby/members/%u/revoke-invite";
+	char url_buffer[64];
+	sprintf_s(url_buffer, 64, format, id);
+	std::string ret = POST(url(url_buffer), "");
+	if (ret == std::to_string(id)) {
+		return true;
+	}
+	return false;
+}
+
+bool LCU_API::SetPartyType(PartyType type) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	const char* types[] = {"open", "closed"};
+	std::string ret = PUT(url("/lol-lobby/v2/lobby/partyType"), types[static_cast<int>(type)]);
+	if (ret.empty()) {
+		return true;
+	}
+	return false;
+}
+
+bool LCU_API::IsPartyActive() {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	std::string ret = GET(url("/lol-lobby/v2/party-active"), "");
+	if (ret == "true") {
+		return true;
+	}
+	return false;
+}
+
+bool LCU_API::PlayAgain() {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	std::string ret = GET(url("/lol-lobby/v2/play-again"), "");
+	if (ret.empty()) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+Json::Value LCU_API::GetReceivedInvitations() {
+	if (!IsAPIServerConnected()) {
+		return NULL;
+	}
+	std::string data = GET(url("/lol-lobby/v2/received-invitations"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		if (root.isArray()) {
+			return root;
+		}
+	}
+	return NULL;
+}
+
+bool LCU_API::AcceptInvitation(const char* invitationId) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	const char* format = "/lol-lobby/v2/received-invitations/%s/accept";
+	char uri_buffer[128];
+	sprintf_s(uri_buffer, 128, format, invitationId);
+	std::string data = GET(url(uri_buffer), "");
+	if (data.empty()) {
+		return true;
+	}
+	return false;
+}
+
+bool LCU_API::DeclineInvitation(const char* invitationId) {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	const char* format = "/lol-lobby/v2/received-invitations/%s/decline";
+	char uri_buffer[128];
+	sprintf_s(uri_buffer, 128, format, invitationId);
+	std::string data = GET(url(uri_buffer), "");
+	if (data.empty()) {
+		return true;
+	}
+	return false;
+}
+
+Json::Value LCU_API::GetAllGridChampions() {
+	if (!IsAPIServerConnected()) {
+		return NULL;
+	}
+	std::string data = GET(url("/lol-champ-select/v1/all-grid-champions"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		if (root.isArray()) {
+			return root;
+		}
+	}
+	return NULL;
+}
+
+Json::Value LCU_API::GetBannableChampionIds() {
+	if (!IsAPIServerConnected()) {
+		return NULL;
+	}
+	std::string data = GET(url("/lol-champ-select/v1/bannable-champion-ids"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		if (root.isArray()) {
+			return root;
+		}
+	}
+	return NULL;
+}
+
+int LCU_API::GetCurrentChampion() {
+	if (!IsAPIServerConnected()) {
+		return 0;
+	}
+	std::string data = GET(url("/lol-champ-select/v1/current-champion"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		return 0;
+	}
+	return atoi(data.c_str());
 }

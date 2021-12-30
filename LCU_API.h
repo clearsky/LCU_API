@@ -28,6 +28,9 @@ namespace LCUAPI {
 		DEL,
 		ALL
 	};
+	enum class PartyType {
+		OPEN,CLOSED
+	};
 	enum class EventHandleType
 	{
 		FILTER,
@@ -77,7 +80,7 @@ class LCU_API
 		bool OnCloseRoom(EVENT_CALLBACK call_back);
 		bool OnUpdateRoom(EVENT_CALLBACK call_back);
 		// API
-		// ============lobby===============
+		// ======================lobby=========================
 		// /lol-lobby/v2/lobby
 		bool BuildRoom(QueueID type); 
 		bool BuildTFTNormalRoom(); 
@@ -123,6 +126,33 @@ class LCU_API
 		Json::Value GetLobbyMembers();
 		// /lol-lobby/v2/lobby/members/localMember/position-preferences 设置排位预选位
 		bool SetPositionPreferences(PositionPref first, PositionPref second);
+		// /lol-lobby/v2/lobby/members/{summoner ID}/grant-invite 授予邀请权限
+		bool GrantInviteBySummonerId(long long id);
+		// /lol-lobby/v2/lobby/members/{summoner ID}/kick 踢出房间
+		bool KickSummonerBySummonerId(long long id);
+		// /lol-lobby/v2/lobby/members/{summoner ID}/promote 转移房主权限
+		bool PromoteSummonerBySummonerId(long long id);
+		// /lol-lobby/v2/lobby/members/{summoner ID}/revoke-invite 收回邀请权限
+		bool RevokeInviteBySummonerId(long long id);
+		// /lol-lobby/v2/lobby/partyType 设置小队状态
+		bool SetPartyType(PartyType type);
+		// /lol-lobby/v2/party-active 是否在房间中
+		bool IsPartyActive();
+		// /lol-lobby/v2/play-again 再玩一次
+		bool PlayAgain();
+		// /lol-lobby/v2/received-invitations 被邀请信息
+		Json::Value GetReceivedInvitations();
+		// /lol-lobby/v2/received-invitations/{invitationId}/accept // 接受邀请
+		bool AcceptInvitation(const char* invitationId);
+		// /lol-lobby/v2/received-invitations/{invitationId}/decline // 拒绝邀请
+		bool DeclineInvitation(const char* invitationId);
+		// ===============champ-select=============
+		// /lol-champ-select/v1/all-grid-champions 获取所有英雄信息
+		Json::Value GetAllGridChampions();
+		// /lol-champ-select/v1/bannable-champion-ids 可以ban的英雄列表
+		Json::Value GetBannableChampionIds();
+		// /lol-champ-select/v1/current-champion 当前选择的英雄ID
+		int GetCurrentChampion();
 };
 }
 
