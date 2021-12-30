@@ -54,5 +54,23 @@ API实在太多了,文档又很有限,只能一个个尝试
 |GetCommsToken|/lol-lobby/v2/comms/token|获取comm toke|
 |CheckPartyEligibility|/lol-lobby/v2/eligibility/party|查询当前房间是否有资格转换到其他类型的房间,和self版本不同,同一个房间中可能有拖后腿的导致不能换到某些模式|
 |CheckSelfEligibility|/lol-lobby/v2/eligibility/self|自己能否创建某种类型的房间|
-
-
+|GetLobbyInvitations|/lol-lobby/v2/lobby/invitations|房间右下角邀请信息|
+|InviteBySummonerIdS|/lol-lobby/v2/lobby/invitations|邀请|
+|StartQueue|/lol-lobby/v2/lobby/matchmaking/search|POST开始匹配|
+|StopQueue|/lol-lobby/v2/lobby/matchmaking/search|DELETE终止匹配|
+|GetSearchState|/lol-lobby/v2/lobby/matchmaking/search-state|获取匹配状态|
+|GetLobbyMembers|/lol-lobby/v2/lobby/members|获取房间内玩家信息|
+|SetPositionPreferences|/lol-lobby/v2/lobby/members/localMember/position-preferences|设置排位预选位|
+|GrantInviteBySummonerId|/lol-lobby/v2/lobby/members/{summoner ID}/grant-invite|授予邀请权限|
+|KickSummonerBySummonerId|/lol-lobby/v2/lobby/members/{summoner ID}/kick|踢出房间|
+|PromoteSummonerBySummonerId|/lol-lobby/v2/lobby/members/{summoner ID}/promote|转移房主权限|
+|RevokeInviteBySummonerId|/lol-lobby/v2/lobby/members/{summoner ID}/revoke-invite|收回邀请权限|
+|SetPartyType|/lol-lobby/v2/lobby/partyType|设置小队状态|
+|IsPartyActive|/lol-lobby/v2/party-active|是否在房间中|
+|PlayAgain|/lol-lobby/v2/play-again|再玩一次|
+|GetReceivedInvitations|/lol-lobby/v2/received-invitations|被邀请信息|
+|AcceptInvitation|/lol-lobby/v2/received-invitations/{invitationId}/accept|接受邀请|
+|DeclineInvitation|/lol-lobby/v2/received-invitations/{invitationId}/decline|拒绝邀请|
+|GetAllGridChampions|/lol-champ-select/v1/all-grid-champions|获取所有英雄信息|
+|GetBannableChampionIds|/lol-champ-select/v1/bannable-champion-ids|可以ban的英雄列表|
+|GetCurrentChampion|/lol-champ-select/v1/current-champion|当前选择的英雄ID|
