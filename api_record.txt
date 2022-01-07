@@ -50,3 +50,9 @@
 /lol-champ-select/v1/bannable-champion-ids 可以ban的英雄列表
 /lol-champ-select/v1/battle-training/launch unkonw
 /lol-champ-select/v1/current-champion 当前选择的英雄ID
+--------------------------plugin lol-game-setting--------------------------
+/lol-game-settings/v1/game-settings 游戏内设置
+--------------------------plugin lol-game-flow--------------------------
+/lol-gameflow/v1/reconnect 游戏重连
+--------------------------plugin lol-matchmaking--------------------------
+/lol-matchmaking/v1/ready-check/decline 拒绝队列

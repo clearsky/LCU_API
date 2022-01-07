@@ -139,10 +139,12 @@ bool LCU_API::Connect() {
 			std::placeholders::_2, auth.leagueHeader, "", "", auth.leaguePort);
 		DELETe = std::bind(request_call, obj, "DELETE", std::placeholders::_1,
 			std::placeholders::_2, auth.leagueHeader, "", "", auth.leaguePort);
+		PATCH = std::bind(request_call, obj, "PATCH", std::placeholders::_1,
+			std::placeholders::_2, auth.leagueHeader, "", "", auth.leaguePort);
 
 		// check lol client is ready
-		std::string load_ok_str = GET(url("/memory/v1/fe-processes-ready"), "");
-		if (load_ok_str != "true") {
+		std::string load_ok_str = GET(url("/lol-clash/v1/ping"), "");
+		if (load_ok_str != R"("pong")") {
 			return connected;
 		}
 
@@ -930,4 +932,38 @@ int LCU_API::GetCurrentChampion() {
 		return 0;
 	}
 	return atoi(data.c_str());
+}
+
+bool LCU_API::SetGameSettings() {
+	const char* data = R"({"FloatingText":{"Dodge_Enabled":false,"EnemyPhysicalDamage_Enabled":false,"Experience_Enabled":false,"Gold_Enabled":false,"Heal_Enabled":false,"Invulnerable_Enabled":false,"Level_Enabled":false,"ManaDamage_Enabled":false,"PhysicalDamage_Enabled":false,"QuestReceived_Enabled":false,"Score_Enabled":false,"Special_Enabled":false},"General":{"AutoAcquireTarget":false,"BindSysKeys":false,"CursorOverride":false,"CursorScale":1.0,"EnableAudio":false,"EnableTargetedAttackMove":false,"GameMouseSpeed":10,"HideEyeCandy":false,"OSXMouseAcceleration":false,"PredictMovement":false,"PreferDX9LegacyMode":false,"PreferOpenGLLegacyMode":false,"RelativeTeamColors":false,"ShowCursorLocator":false,"ShowGodray":false,"ShowTurretRangeIndicators":false,"SnapCameraOnRespawn":false,"ThemeMusic":0,"WaitForVerticalSync":false,"WindowMode":2},"HUD":{"AutoDisplayTarget":false,"CameraLockMode":0,"ChatScale":100,"DisableHudSpellClick":false,"DrawHealthBars":true,"EmotePopupUIDisplayMode":2,"EmoteSize":1,"EnableLineMissileVis":false,"EternalsMilestoneDisplayMode":0,"FlashScreenWhenDamaged":false,"FlashScreenWhenStunned":false,"FlipMiniMap":false,"GlobalScale":0.019999999552965164,"KeyboardScrollSpeed":0.0,"MapScrollSpeed":0.5,"MiddleClickDragScrollEnabled":false,"MinimapMoveSelf":false,"MinimapScale":0.029999999329447746,"MirroredScoreboard":false,"NumericCooldownFormat":1,"ObjectTooltips":false,"ScrollSmoothingEnabled":false,"ShowAllChannelChat":false,"ShowAlliedChat":false,"ShowAttackRadius":false,"ShowNeutralCamps":false,"ShowSpellCosts":false,"ShowSummonerNames":false,"ShowSummonerNamesInScoreboard":false,"ShowTeamFramesOnLeft":false,"ShowTimestamps":false,"SmartCastOnKeyRelease":false,"SmartCastWithIndicator_CastWhenNewSpellSelected":false},"LossOfControl":{"LossOfControlEnabled":false,"ShowSlows":false},"Performance":{"EnableHUDAnimations":false},"Voice":{"ShowVoiceChatHalos":false,"ShowVoicePanelWithScoreboard":false},"Volume":{"AmbienceMute":false,"AmbienceVolume":0.75,"AnnouncerMute":false,"AnnouncerVolume":0.75,"MasterMute":false,"MasterVolume":0.63999998569488525,"MusicMute":false,"MusicVolume":0.75,"PingsMute":false,"PingsVolume":0.75,"SfxMute":false,"SfxVolume":0.75,"VoiceMute":false,"VoiceVolume":0.75}})";
+	std::string ret = PATCH(url("/lol-game-settings/v1/game-settings"), data);
+	if (ret.empty()) {
+		return true;
+	}
+	return false;
+}
+
+bool LCU_API::Reconnect() {
+	std::string data = POST(url("/lol-gameflow/v1/reconnect"), "");
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		if (!root["httpStatus"].asInt()) {
+			return false;
+		}
+	}
+	else {
+		return false;
+	}
+	return true;
+}
+
+bool LCU_API::DeclineSearch() {
+	std::string ret = POST(url("/lol-matchmaking/v1/ready-check/decline"), "");
+	if (ret.empty()) {
+		return true;
+	}
+	return false;
 }

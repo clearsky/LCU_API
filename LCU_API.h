@@ -61,6 +61,7 @@ class LCU_API
 		std::function<std::string(const std::string&, const std::string&)> POST;
 		std::function<std::string(const std::string&, const std::string&)> PUT;
 		std::function<std::string(const std::string&, const std::string&)> DELETe;
+		std::function<std::string(const std::string&, const std::string&)> PATCH;
 	public:
 		bool Connect();
 		void HandleEventMessage(web::websockets::client::websocket_incoming_message& msg);
@@ -153,6 +154,14 @@ class LCU_API
 		Json::Value GetBannableChampionIds();
 		// /lol-champ-select/v1/current-champion 当前选择的英雄ID
 		int GetCurrentChampion();
+		// ===============game-setting=============
+		// /lol-game-settings/v1/game-settings
+		bool SetGameSettings();
+		// /lol-gameflow/v1/reconnect 游戏重连
+		bool Reconnect();
+		// ===============matchmaking=============
+		// /lol-matchmaking/v1/ready-check/decline 拒绝队列
+		bool DeclineSearch();
 };
 }
 

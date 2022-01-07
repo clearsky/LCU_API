@@ -11,14 +11,7 @@ int main() {
 	});*/
 	LCU_API api(EventHandleType::BIND);
 	api.Connect();
-	Json::Value data = api.GetAllGridChampions();
-	int count = 0;
-	for (auto item : data) {
-		std::cout << "id:" << item["id"].asInt() << " ";
-		std::cout << "name:" << utils->UtfToGbk(item["name"].asString().c_str()) << std::endl;
-		++count;
-	}
-	std::cout << "count:" << count << std::endl;
+	api.Reconnect();
 
 	/*api.ExitRoom();*/
 	//api.SetMetaData(PositionPref::FILL, PositionPref::FILL);
