@@ -371,6 +371,25 @@ bool LCU_API::BindEventAuto(const std::string& event_name,const std::string& uri
 	});
 }
 
+bool LCU_API::OnCreateSearch(EVENT_CALLBACK call_back) {
+	std::string event_name = "OnJsonApiEvent_lol-matchmaking_v1_search";
+	bool ret = BindEventAuto(event_name, "/lol-matchmaking/v1/search");
+	binded_event[event_name][0] = call_back;
+	return ret;
+}
+bool LCU_API::OnUpdateSearch(EVENT_CALLBACK call_back) {
+	std::string event_name = "OnJsonApiEvent_lol-matchmaking_v1_search";
+	bool ret = BindEventAuto(event_name, "/lol-matchmaking/v1/search");
+	binded_event[event_name][1] = call_back;
+	return ret;
+}
+bool LCU_API::OnDeleteSearch(EVENT_CALLBACK call_back) {
+	std::string event_name = "OnJsonApiEvent_lol-matchmaking_v1_search";
+	bool ret = BindEventAuto(event_name, "/lol-matchmaking/v1/search");
+	binded_event[event_name][2] = call_back;
+	return ret;
+}
+
 bool LCU_API::OnCreateRoom(EVENT_CALLBACK call_back) {
 	std::string event_name = "OnJsonApiEvent_lol-lobby_v2_lobby";
 	bool ret = BindEventAuto(event_name, "/lol-lobby/v2/lobby");
@@ -935,15 +954,27 @@ int LCU_API::GetCurrentChampion() {
 }
 
 bool LCU_API::SetGameSettings() {
-	const char* data = R"({"FloatingText":{"Dodge_Enabled":false,"EnemyPhysicalDamage_Enabled":false,"Experience_Enabled":false,"Gold_Enabled":false,"Heal_Enabled":false,"Invulnerable_Enabled":false,"Level_Enabled":false,"ManaDamage_Enabled":false,"PhysicalDamage_Enabled":false,"QuestReceived_Enabled":false,"Score_Enabled":false,"Special_Enabled":false},"General":{"AutoAcquireTarget":false,"BindSysKeys":false,"CursorOverride":false,"CursorScale":1.0,"EnableAudio":false,"EnableTargetedAttackMove":false,"GameMouseSpeed":10,"HideEyeCandy":false,"OSXMouseAcceleration":false,"PredictMovement":false,"PreferDX9LegacyMode":false,"PreferOpenGLLegacyMode":false,"RelativeTeamColors":false,"ShowCursorLocator":false,"ShowGodray":false,"ShowTurretRangeIndicators":false,"SnapCameraOnRespawn":false,"ThemeMusic":0,"WaitForVerticalSync":false,"WindowMode":2},"HUD":{"AutoDisplayTarget":false,"CameraLockMode":0,"ChatScale":100,"DisableHudSpellClick":false,"DrawHealthBars":true,"EmotePopupUIDisplayMode":2,"EmoteSize":1,"EnableLineMissileVis":false,"EternalsMilestoneDisplayMode":0,"FlashScreenWhenDamaged":false,"FlashScreenWhenStunned":false,"FlipMiniMap":false,"GlobalScale":0.019999999552965164,"KeyboardScrollSpeed":0.0,"MapScrollSpeed":0.5,"MiddleClickDragScrollEnabled":false,"MinimapMoveSelf":false,"MinimapScale":0.029999999329447746,"MirroredScoreboard":false,"NumericCooldownFormat":1,"ObjectTooltips":false,"ScrollSmoothingEnabled":false,"ShowAllChannelChat":false,"ShowAlliedChat":false,"ShowAttackRadius":false,"ShowNeutralCamps":false,"ShowSpellCosts":false,"ShowSummonerNames":false,"ShowSummonerNamesInScoreboard":false,"ShowTeamFramesOnLeft":false,"ShowTimestamps":false,"SmartCastOnKeyRelease":false,"SmartCastWithIndicator_CastWhenNewSpellSelected":false},"LossOfControl":{"LossOfControlEnabled":false,"ShowSlows":false},"Performance":{"EnableHUDAnimations":false},"Voice":{"ShowVoiceChatHalos":false,"ShowVoicePanelWithScoreboard":false},"Volume":{"AmbienceMute":false,"AmbienceVolume":0.75,"AnnouncerMute":false,"AnnouncerVolume":0.75,"MasterMute":false,"MasterVolume":0.63999998569488525,"MusicMute":false,"MusicVolume":0.75,"PingsMute":false,"PingsVolume":0.75,"SfxMute":false,"SfxVolume":0.75,"VoiceMute":false,"VoiceVolume":0.75}})";
-	std::string ret = PATCH(url("/lol-game-settings/v1/game-settings"), data);
-	if (ret.empty()) {
-		return true;
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	const char* content = R"({"Accessibility":{"ColorGamma":"0.0000","ColorContrast":"0.0000","ColorBrightness":"0.0000","ColorLevel":"0.0000"},"Voice":{"InputMode":0,"InputDevice":"Default System Device","InputVolume":"0.5000","ActivationSensitivity":"0.6500"},"General":{"CursorScale":"0.0000","SystemMouseSpeed":10,"WindowMode":2,"Height":768,"Width":1024,"WaitForVerticalSync":0,"SnapCameraOnRespawn":0,"ShowTurretRangeIndicators":0,"ShowGodray":0,"RelativeTeamColors":0,"MinimizeCameraMotion":0,"BindSysKeys":0,"HideEyeCandy":1,"EnableTargetedAttackMove":0,"EnableScreenShake":0,"EnableLightFx":0,"EnableCustomAnnouncer":1,"EnableAudio":0,"AutoAcquireTarget":0,"AlwaysShowExtendedTooltip":0},"HUD":{"DrawHealthBars":1,"ShopScale":"0.0000","PracticeToolScale":"0.0000","MinimapScale":"0.0000","KeyboardScrollSpeed":"0.5000","GlobalScale":"0.0000","DeathRecapScale":"0.0000","ShowSummonerNames":0,"EmoteSize":1,"EmotePopupUIDisplayMode":2,"NumericCooldownFormat":3,"ChatScale":0,"SmartCastOnKeyRelease":0,"ShowSummonerNamesInScoreboard":0,"ObjectTooltips":0,"ShowNeutralCamps":0,"ShowHealthBarShake":0,"ShowAttackRadius":0,"ShowAlliedChat":0,"MinimapMoveSelf":0,"FlashScreenWhenStunned":0,"FlashScreenWhenDamaged":0,"EnableLineMissileVis":0,"AutoDisplayTarget":0},"Performance":{"ShadowQuality":0,"FrameCapType":3,"EnvironmentQuality":0,"EffectsQuality":0,"CharacterQuality":0,"EnableHUDAnimations":0,"EnableGrassSwaying":1,"EnableFXAA":0,"CharacterInking":0},"MapSkinOptions":{"MapSkinOptionDisableWorlds":0,"MapSkinOptionDisableURF":0,"MapSkinOptionDisableStarGuardian":0,"MapSkinOptionDisableSnowdown":0,"MapSkinOptionDisableProject":0,"MapSkinOptionDisablePopstar":0,"MapSkinOptionDisablePoolParty":0,"MapSkinOptionDisableOdyssey":0,"MapSkinOptionDisableMSI":0,"MapSkinOptionDisableLunarRevel":0,"MapSkinOptionDisableArcade":0},"Volume":{"VoiceMute":1,"SfxMute":1,"PingsMute":1,"MusicMute":1,"MasterMute":1,"AnnouncerMute":1,"AmbienceMute":1},"FloatingText":{"Special_Enabled":0,"Score_Enabled":0,"QuestReceived_Enabled":0,"ManaDamage_Enabled":0,"Level_Enabled":0,"Invulnerable_Enabled":0,"Heal_Enabled":0,"Gold_Enabled":0,"Experience_Enabled":0,"EnemyDamage_Enabled":0,"Dodge_Enabled":0,"Damage_Enabled":0},"LossOfControl":{"LossOfControlEnabled":0},"Replay":{"EnableDirectedCamera":0},"Highlights":{"VideoQuality":0,"VideoFrameRate":60,"ScaleVideo":720,"AudioQuality":1}})";
+	std::string data = PATCH(url("/lol-game-settings/v1/game-settings"), content);
+	Json::CharReaderBuilder builder;
+	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+	JSONCPP_STRING err;
+	Json::Value root;
+	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
+		if (!root["httpStatus"].asInt()) {
+			return true;
+		}
 	}
 	return false;
 }
 
 bool LCU_API::Reconnect() {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	std::string data = POST(url("/lol-gameflow/v1/reconnect"), "");
 	Json::CharReaderBuilder builder;
 	const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
@@ -951,17 +982,44 @@ bool LCU_API::Reconnect() {
 	Json::Value root;
 	if (!reader->parse(data.c_str(), data.c_str() + static_cast<int>(data.length() - 1), &root, &err)) {
 		if (!root["httpStatus"].asInt()) {
-			return false;
+			return true;
 		}
 	}
-	else {
-		return false;
-	}
-	return true;
+	return false;
 }
 
 bool LCU_API::DeclineSearch() {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
 	std::string ret = POST(url("/lol-matchmaking/v1/ready-check/decline"), "");
+	if (ret.empty()) {
+		return true;
+	}
+	return false;
+}
+
+bool LCU_API::AcceptSearch() {
+	if (!IsAPIServerConnected()) {
+		return false;
+	}
+	std::string ret = POST(url("/lol-matchmaking/v1/ready-check/accept"), "");
+	if (ret.empty()) {
+		return true;
+	}
+	return false;
+}
+
+bool LCU_API::KillUx() {
+	std::string ret = POST(url("/riotclient/kill-ux"), "");
+	if (ret.empty()) {
+		return true;
+	}
+	return false;
+}
+
+bool LCU_API::ShowUx() {
+	std::string ret = POST(url("/riotclient/ux-show"), "");
 	if (ret.empty()) {
 		return true;
 	}

@@ -80,6 +80,9 @@ class LCU_API
 		bool OnCreateRoom(EVENT_CALLBACK call_back);
 		bool OnCloseRoom(EVENT_CALLBACK call_back);
 		bool OnUpdateRoom(EVENT_CALLBACK call_back);
+		bool OnCreateSearch(EVENT_CALLBACK call_back);
+		bool OnUpdateSearch(EVENT_CALLBACK call_back);
+		bool OnDeleteSearch(EVENT_CALLBACK call_back);
 		// API
 		// ======================lobby=========================
 		// /lol-lobby/v2/lobby
@@ -162,6 +165,13 @@ class LCU_API
 		// ===============matchmaking=============
 		// /lol-matchmaking/v1/ready-check/decline 拒绝队列
 		bool DeclineSearch();
+		// /lol-matchmaking/v1/ready-check/accept 接受队列
+		bool AcceptSearch();
+		// ===============default=============
+		// /riotclient/kill-ux 隐藏界面
+		bool KillUx();
+		// /riotclient/ux-show 显示界面
+		bool ShowUx();
 };
 }
 

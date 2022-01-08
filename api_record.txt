@@ -56,3 +56,7 @@
 /lol-gameflow/v1/reconnect 游戏重连
 --------------------------plugin lol-matchmaking--------------------------
 /lol-matchmaking/v1/ready-check/decline 拒绝队列
+/lol-matchmaking/v1/ready-check/accept 接受队列
+--------------------------default--------------------------
+/riotclient/kill-ux 隐藏界面
+/riotclient/ux-show 显示界面
