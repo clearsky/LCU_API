@@ -90,6 +90,7 @@ class LCU_API
 		bool OpenAutoReconnect(); // UPDATE类型
 		bool OpenAutoAccept(); // UPDATE类型
 		bool OpenAutoStartQueue(QueueID type); // UPDATE类型
+		bool OpenAutoStartNext(QueueID type);
 		// API
 		// ======================lobby=========================
 		// /lol-lobby/v2/lobby

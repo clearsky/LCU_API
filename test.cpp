@@ -14,7 +14,7 @@ int main() {
 	api.OpenAutoAccept();
 	api.OpenAutoReconnect();
 	api.OpenAutoStartQueue(QueueID::TFTNormal);
-	api.BuildRoom(QueueID::TFTNormal);
+	api.OpenAutoStartNext(QueueID::TFTNormal);
 	/*api.ExitRoom();*/
 	//api.SetMetaData(PositionPref::FILL, PositionPref::FILL);
 	

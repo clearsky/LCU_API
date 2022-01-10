@@ -452,24 +452,34 @@ bool LCU_API::OpenAutoAccept() {
 }
 
 bool LCU_API::OpenAutoStartQueue(QueueID type) {
-	return OnCreateRoom((EVENT_CALLBACK)[this, &type](Json::Value& data) {
+	return OnCreateRoom((EVENT_CALLBACK)[this, type](Json::Value& data) {
 		// ÅÐ¶Ïqueueid
-		if (data[2]["data"].isMember("gameConfig") && data[2]["data"]["gameConfig"]["queueID"].asInt() == static_cast<int>(type)) {
-			this->StartQueue();
-		}
-		else {
-			this->ExitRoom();
-			this->BuildRoom(type);
-		}
-	}) && OnUpdateRoom((EVENT_CALLBACK)[this, &type](Json::Value& data) {
-			// ÅÐ¶Ïqueueid
-			if (data[2]["data"].isMember("gameConfig") && data[2]["data"]["gameConfig"]["queueID"].asInt() == static_cast<int>(type)) {
+		if (data[2]["data"].isMember("gameConfig") ) {
+			if (data[2]["data"]["gameConfig"]["queueId"].asInt() == static_cast<int>(type)) {
 				this->StartQueue();
 			}
 			else {
 				this->ExitRoom();
-				this->BuildRoom(type);
 			}
+		}
+	}) && OnUpdateRoom((EVENT_CALLBACK)[this, type](Json::Value& data) {
+		// ÅÐ¶Ïqueueid
+		if (data[2]["data"].isMember("gameConfig") && data[2]["data"]["gameConfig"]["queueId"].asInt() != static_cast<int>(type)) {
+			this->ExitRoom();
+		}
+	}) && OnCloseRoom((EVENT_CALLBACK)[this, type](Json::Value& data) {
+		for (int i = 0; i < 3; i++) {
+			if (this->BuildRoom(type)) {
+				return;
+			}
+			Sleep(1000);
+		}
+	});
+}
+
+bool LCU_API::OpenAutoStartNext(QueueID type) {
+	return OnCreateSearch((EVENT_CALLBACK)[this, type](Json::Value& data) {
+		this->BuildRoom(type);
 	});
 }
 
