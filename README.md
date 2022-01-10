@@ -36,6 +36,16 @@ cpprest用vs的nuget安装会非常方便。
 |OnCreateRoom||给创建房间事件添加一个回调函数|
 |OnCloseRoom||给退出房间事件添加一个回调函数|
 |OnUpdateRoom||给房间更新事件添加一个回调函数|
+|OnCreateSearch||给创建队列添加一个回调函数|
+|OnUpdateSearch||给队列状态更新添加一个回调函数|
+|OnDeleteSearch||给推出队列添加一个回调函数|
+|OnCreateEndOfGame||给结束游戏添加一个回调函数|
+|OnUpdateEndOfGame||给结束游戏状态更新添加一个回调函数|
+|OnDeleteEndOfGame||给推出结束游戏状态添加一个回调函数|
+|OpenAutoReconnect||自动重新连接游戏|
+|OpenAutoAccept||自动接受游戏|
+|OpenAutoStartQueue||自动创建队列|
+|OpenAutoStartNext||自动开始下一句游戏|
 |BuildRoom|/lol-lobby/v2/lobby|创建房间|
 |BuildTFTNormalRoom|/lol-lobby/v2/lobby|创建云顶匹配房间|
 |BuildTFTRankRoom|/lol-lobby/v2/lobby|创建排位房间|
@@ -74,3 +84,9 @@ cpprest用vs的nuget安装会非常方便。
 |GetAllGridChampions|/lol-champ-select/v1/all-grid-champions|获取所有英雄信息|
 |GetBannableChampionIds|/lol-champ-select/v1/bannable-champion-ids|可以ban的英雄列表|
 |GetCurrentChampion|/lol-champ-select/v1/current-champion|当前选择的英雄ID|
+|SetGameSettings|/lol-game-settings/v1/game-settings|修改游戏配置|
+|Reconnect|/lol-gameflow/v1/reconnect|重新连接游戏|
+|DeclineSearch|/lol-matchmaking/v1/ready-check/decline|拒绝队列|
+|AcceptSearch|/lol-matchmaking/v1/ready-check/accept|接受队列|
+|KillUx|/riotclient/kill-ux|隐藏客户端界面|
+|ShowUx|/riotclient/ux-show|显示客户端界面|
