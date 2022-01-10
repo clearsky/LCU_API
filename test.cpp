@@ -11,16 +11,10 @@ int main() {
 	});*/
 	LCU_API api(EventHandleType::BIND);
 	api.Connect();
-	api.OnCreateSearch((EVENT_CALLBACK)[](Json::Value& data) {
-		std::cout << "create search" << std::endl;
-	});
-	api.OnUpdateSearch((EVENT_CALLBACK)[](Json::Value& data) {
-		std::cout << "update search" << std::endl;
-		});
-	api.OnDeleteSearch((EVENT_CALLBACK)[](Json::Value& data) {
-		std::cout << "delete search" << std::endl;
-		});
-
+	api.OpenAutoAccept();
+	api.OpenAutoReconnect();
+	api.OpenAutoStartQueue(QueueID::TFTNormal);
+	api.BuildRoom(QueueID::TFTNormal);
 	/*api.ExitRoom();*/
 	//api.SetMetaData(PositionPref::FILL, PositionPref::FILL);
 	

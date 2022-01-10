@@ -83,6 +83,13 @@ class LCU_API
 		bool OnCreateSearch(EVENT_CALLBACK call_back);
 		bool OnUpdateSearch(EVENT_CALLBACK call_back);
 		bool OnDeleteSearch(EVENT_CALLBACK call_back);
+		bool OnCreateEndOfGame(EVENT_CALLBACK call_back);
+		bool OnUpdateEndOfGame(EVENT_CALLBACK call_back);
+		bool OnDeleteEndOfGame(EVENT_CALLBACK call_back);
+
+		bool OpenAutoReconnect(); // UPDATE类型
+		bool OpenAutoAccept(); // UPDATE类型
+		bool OpenAutoStartQueue(QueueID type); // UPDATE类型
 		// API
 		// ======================lobby=========================
 		// /lol-lobby/v2/lobby

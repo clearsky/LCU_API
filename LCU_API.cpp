@@ -411,6 +411,68 @@ bool LCU_API::OnUpdateRoom(EVENT_CALLBACK call_back) {
 	return ret;
 }
 
+bool LCU_API::OnCreateEndOfGame(EVENT_CALLBACK call_back) {
+	std::string event_name = "OnJsonApiEvent_lol-end-of-game_v1_gameclient-eog-stats-block";
+	bool ret = BindEventAuto(event_name, "/lol-end-of-game/v1/gameclient-eog-stats-block");
+	binded_event[event_name][0] = call_back;
+	return ret;
+}
+
+bool LCU_API::OnUpdateEndOfGame(EVENT_CALLBACK call_back) {
+	std::string event_name = "OnJsonApiEvent_lol-end-of-game_v1_gameclient-eog-stats-block";
+	bool ret = BindEventAuto(event_name, "/lol-end-of-game/v1/gameclient-eog-stats-block");
+	binded_event[event_name][1] = call_back;
+	return ret;
+}
+
+bool LCU_API::OnDeleteEndOfGame(EVENT_CALLBACK call_back) {
+	std::string event_name = "OnJsonApiEvent_lol-end-of-game_v1_gameclient-eog-stats-block";
+	bool ret = BindEventAuto(event_name, "/lol-end-of-game/v1/gameclient-eog-stats-block");
+	binded_event[event_name][2] = call_back;
+	return ret;
+}
+
+bool LCU_API::OpenAutoReconnect() {
+	std::string event_name = "OnJsonApiEvent_lol-gameflow_v1_session";
+	bool ret = BindEventAuto(event_name, "/lol-gameflow/v1/session");
+	binded_event[event_name][1] = (EVENT_CALLBACK)[this](Json::Value& data) {
+		if (data[2]["data"].isMember("phase") && data[2]["data"]["phase"] == "Reconnect") {
+			this->Reconnect();
+		}
+	};
+	return ret;
+}
+
+bool LCU_API::OpenAutoAccept() {
+	return OnUpdateSearch((EVENT_CALLBACK)[this](Json::Value& data) {
+		if (data[2]["data"].isMember("searchState") && data[2]["data"]["searchState"] == "Found") {
+			this->AcceptSearch();
+		}
+	});
+}
+
+bool LCU_API::OpenAutoStartQueue(QueueID type) {
+	return OnCreateRoom((EVENT_CALLBACK)[this, &type](Json::Value& data) {
+		// ÅÐ¶Ïqueueid
+		if (data[2]["data"].isMember("gameConfig") && data[2]["data"]["gameConfig"]["queueID"].asInt() == static_cast<int>(type)) {
+			this->StartQueue();
+		}
+		else {
+			this->ExitRoom();
+			this->BuildRoom(type);
+		}
+	}) && OnUpdateRoom((EVENT_CALLBACK)[this, &type](Json::Value& data) {
+			// ÅÐ¶Ïqueueid
+			if (data[2]["data"].isMember("gameConfig") && data[2]["data"]["gameConfig"]["queueID"].asInt() == static_cast<int>(type)) {
+				this->StartQueue();
+			}
+			else {
+				this->ExitRoom();
+				this->BuildRoom(type);
+			}
+	});
+}
+
 // ==================API==================
 bool LCU_API::BuildRoom(QueueID type) {
 	if (!IsAPIServerConnected()) {
