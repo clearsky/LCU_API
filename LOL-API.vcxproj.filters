@@ -102,7 +102,4 @@
   <ItemGroup>
     <Text Include="api_record.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>

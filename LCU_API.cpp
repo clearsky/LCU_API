@@ -443,8 +443,21 @@ bool LCU_API::OpenAutoReconnect() {
 	return ret;
 }
 
-bool LCU_API::OpenAutoAccept() {
-	return OnUpdateSearch((EVENT_CALLBACK)[this](Json::Value& data) {
+bool LCU_API::OpenAutoAccept(QueueID type, long timeOut) {
+	return OnUpdateSearch((EVENT_CALLBACK)[this, type, timeOut](Json::Value& data) {
+		// 队列时长检测
+		if (data[2]["data"].isMember("timeInQueue") && data[2]["data"]["timeInQueue"].asInt() >= timeOut) {
+			this->StopQueue();
+			this->ExitRoom();
+			return;
+		}
+		// 游戏模式检测
+		if (data[2]["data"].isMember("queueId") && data[2]["data"]["queueId"].asInt() != static_cast<int>(type)) {
+			this->DeclineSearch();
+			this->ExitRoom();
+			return;
+		}
+		// 队列状态检测
 		if (data[2]["data"].isMember("searchState") && data[2]["data"]["searchState"] == "Found") {
 			this->AcceptSearch();
 		}
@@ -479,6 +492,7 @@ bool LCU_API::OpenAutoStartQueue(QueueID type) {
 
 bool LCU_API::OpenAutoStartNext(QueueID type) {
 	return OnCreateSearch((EVENT_CALLBACK)[this, type](Json::Value& data) {
+		// 统计数据
 		this->BuildRoom(type);
 	});
 }

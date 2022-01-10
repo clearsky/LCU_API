@@ -11,7 +11,7 @@ int main() {
 	});*/
 	LCU_API api(EventHandleType::BIND);
 	api.Connect();
-	api.OpenAutoAccept();
+	api.OpenAutoAccept(QueueID::TFTNormal);
 	api.OpenAutoReconnect();
 	api.OpenAutoStartQueue(QueueID::TFTNormal);
 	api.OpenAutoStartNext(QueueID::TFTNormal);

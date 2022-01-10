@@ -2,7 +2,6 @@
 #include <cpprest/ws_client.h> 
 #include "HTTP.h"
 #include "Auth.h"
-#include "Definitions.h"
 #include <unordered_map>
 #include "json/json.h"
 #include <vector>
@@ -16,6 +15,27 @@
 
 namespace LCUAPI {
 	typedef std::function<void (Json::Value& data)>  EVENT_CALLBACK;
+	enum class QueueID : const int
+	{
+		DraftPick = 400,
+		SoloDuo = 420,
+		BlindPick = 430,
+		Flex = 440,
+		ARAM = 450,
+		Clash = 700,
+		IntroBots = 830,
+		BeginnerBots = 840,
+		IntermediateBots = 850,
+		ARURF = 900,
+		TFTNormal = 1090,
+		TFTRanked = 1100,
+		TFTTutorial = 1110,
+		TFTHyperRoll = 1130,
+		NexusBlitz = 1300,
+		Tutorial1 = 2000,
+		Tutorial2 = 2010,
+		Tutorial3 = 2020,
+	};
 	enum class SearchState
 	{
 		Invalid,
@@ -88,7 +108,7 @@ class LCU_API
 		bool OnDeleteEndOfGame(EVENT_CALLBACK call_back);
 
 		bool OpenAutoReconnect(); // UPDATE类型
-		bool OpenAutoAccept(); // UPDATE类型
+		bool OpenAutoAccept(QueueID type, long timeOut=300); // UPDATE类型
 		bool OpenAutoStartQueue(QueueID type); // UPDATE类型
 		bool OpenAutoStartNext(QueueID type);
 		// API
