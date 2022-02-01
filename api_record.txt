@@ -59,4 +59,4 @@
 /lol-matchmaking/v1/ready-check/accept 接受队列
 --------------------------default--------------------------
 /riotclient/kill-ux 隐藏界面
-/riotclient/ux-show 显示界面 
+/riotclient/ux-show 显示界面  
