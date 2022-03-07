@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="源文件\lcuapi">
+      <UniqueIdentifier>{a58ae14b-655e-47cf-8478-77b1ba31dbc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\json">
+      <UniqueIdentifier>{b5a24a54-5fba-48ea-8cb3-a6891bfa494e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\utils">
+      <UniqueIdentifier>{ca0f6e62-df5f-43bd-9f2c-20cd09ae8af3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="lcuapi\Auth.cpp">
+      <Filter>源文件\lcuapi</Filter>
+    </ClCompile>
+    <ClCompile Include="lcuapi\base64.cpp">
+      <Filter>源文件\lcuapi</Filter>
+    </ClCompile>
+    <ClCompile Include="lcuapi\LCU_API.cpp">
+      <Filter>源文件\lcuapi</Filter>
+    </ClCompile>
+    <ClCompile Include="lcuapi\NtQueryInfoProc.cpp">
+      <Filter>源文件\lcuapi</Filter>
+    </ClCompile>
+    <ClCompile Include="json\json_reader.cpp">
+      <Filter>源文件\json</Filter>
+    </ClCompile>
+    <ClCompile Include="json\json_value.cpp">
+      <Filter>源文件\json</Filter>
+    </ClCompile>
+    <ClCompile Include="json\json_writer.cpp">
+      <Filter>源文件\json</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\httpClient.cpp">
+      <Filter>源文件\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\utils.cpp">
+      <Filter>源文件\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lcuapi\Auth.h">
+      <Filter>源文件\lcuapi</Filter>
+    </ClInclude>
+    <ClInclude Include="lcuapi\base64.h">
+      <Filter>源文件\lcuapi</Filter>
+    </ClInclude>
+    <ClInclude Include="lcuapi\LCU_API.h">
+      <Filter>源文件\lcuapi</Filter>
+    </ClInclude>
+    <ClInclude Include="lcuapi\NtQueryInfoProc.h">
+      <Filter>源文件\lcuapi</Filter>
+    </ClInclude>
+    <ClInclude Include="json\allocator.h">
+      <Filter>源文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\assertions.h">
+      <Filter>源文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\config.h">
+      <Filter>源文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\forwards.h">
+      <Filter>源文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json.h">
+      <Filter>源文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json_features.h">
+      <Filter>源文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json_tool.h">
+      <Filter>源文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\reader.h">
+      <Filter>源文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\value.h">
+      <Filter>源文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\version.h">
+      <Filter>源文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\writer.h">
+      <Filter>源文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\httpClient.h">
+      <Filter>源文件\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\utils.h">
+      <Filter>源文件\utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="json\json_valueiterator.inl">
+      <Filter>源文件\json</Filter>
+    </None>
+  </ItemGroup>
+</Project>
